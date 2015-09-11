@@ -102,9 +102,9 @@ public class MainActivity extends BaseActivity implements
 			if ("com.mdground.message".equals(intent.getAction())) {
 				String message = intent.getStringExtra("message");
 
-				Toast.makeText(MainActivity.this,
-						intent.getStringExtra("message"), Toast.LENGTH_SHORT)
-						.show();
+//				Toast.makeText(MainActivity.this,
+//						intent.getStringExtra("message"), Toast.LENGTH_SHORT)
+//						.show();
 
 				L.e(MainActivity.this, "app发过来的socket信息是 : " + message);
 
@@ -180,8 +180,8 @@ public class MainActivity extends BaseActivity implements
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if ("com.mdground.screen.xgPush".equals(intent.getAction())) {
-				Toast.makeText(MainActivity.this, "收到推送", Toast.LENGTH_SHORT)
-						.show();
+//				Toast.makeText(MainActivity.this, "收到推送", Toast.LENGTH_SHORT)
+//						.show();
 
 				String title = intent.getStringExtra("title");
 				String content = intent.getStringExtra("content");
@@ -189,7 +189,7 @@ public class MainActivity extends BaseActivity implements
 				L.e(MainActivity.this, "拿到的title : " + title);
 				L.e(MainActivity.this, "拿到的content : " + content);
 
-				L.e(MainActivity.this, "收到com.mdground.screen.xgPush的推送了");
+				L.e(MainActivity.this, "收到推送");
 
 				try {
 					JSONObject json = new JSONObject(customContent);
@@ -303,6 +303,7 @@ public class MainActivity extends BaseActivity implements
 		speechSynthesizer.setParam(
 				SpeechSynthesizer.PARAM_TTS_SPEECH_MODEL_FILE,
 				ttsSpeechModelFilePath);
+//		speechSynthesizer.setParam(SpeechSynthesizer.PARAM_VOLUME, "9"); 
 		speechSynthesizer.setParam(SpeechSynthesizer.PARAM_SPEED, "3");
 
 		DataInfoUtils.verifyDataFile(ttsTextModelFilePath);

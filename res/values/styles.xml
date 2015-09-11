@@ -2,13 +2,13 @@
 
     <!--
         Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
     -->
     <style name="AppBaseTheme" parent="android:Theme.Light.NoTitleBar">
         <!--
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
+            backward-compatibility can go here.
         -->
     </style>
 
@@ -47,16 +47,20 @@
     <style name="TextAppearance.Large" parent="@style/TextAppearance">
         <item name="android:textSize">@dimen/size_51</item>
     </style>
+
     <style name="TextAppearance.Small.Gray" parent="@style/TextAppearance.Small">
         <item name="android:textColor">@color/font</item>
     </style>
+
     <style name="TextAppearance.Small.Gray.Bold" parent="@style/TextAppearance.Small">
         <item name="android:textColor">@color/font</item>
         <item name="android:textStyle">bold</item>
     </style>
+
     <style name="TextAppearance.Small.Dark" parent="@style/TextAppearance.Small">
         <item name="android:textColor">@color/font_dark</item>
     </style>
+
     <style name="TextAppearance.Small.Dark.Bold" parent="@style/TextAppearance.Small">
         <item name="android:textColor">@color/font_dark</item>
         <item name="android:textStyle">bold</item>
@@ -81,9 +85,22 @@
     <style name="TextAppearance.Large.Dark" parent="@style/TextAppearance.Large">
         <item name="android:textColor">@color/font_dark</item>
     </style>
+
     <style name="TextAppearance.Large.Dark.Bold" parent="@style/TextAppearance.Large">
         <item name="android:textColor">@color/font_dark</item>
         <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="loadingDialog" parent="android:style/Theme.Dialog">
+
+        <!-- 背景颜色及透明程度 -->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <!-- 是否有标题 -->
+        <item name="android:windowNoTitle">true</item>
+        <!-- 是否浮现在activity之上 -->
+        <item name="android:windowIsFloating">true</item>
+        <!-- 是否模糊 -->
+        <item name="android:backgroundDimEnabled">false</item>
     </style>
 
 </resources>

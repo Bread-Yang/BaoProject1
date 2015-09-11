@@ -3,6 +3,8 @@
     android:id="@+id/login_root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     android:background="@drawable/login_bg" >
 
     <ScrollView

@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.mdground.screen.MedicalAppliction;
 import com.mdground.screen.R;
 import com.mdground.screen.constant.MemberConstant;
+import com.mdground.screen.utils.DeviceIDUtil;
 import com.mdground.screen.utils.L;
 import com.mdground.screen.utils.NetworkStatusUtil;
 import com.mdground.screen.utils.PreferenceUtils;
@@ -32,6 +33,7 @@ import com.mdground.screen.utils.SharedPreferUtils;
 import com.mdground.screen.utils.SharedPreferUtils.ShareKey;
 import com.mdground.screen.view.ResizeLayout;
 import com.mdground.screen.view.ResizeLayout.OnResizeListener;
+import com.mdground.screen.view.dialog.LoadingDialog;
 import com.tencent.android.tpush.XGPushConfig;
 
 public class LoginActivity extends Activity implements OnClickListener,
@@ -41,13 +43,18 @@ public class LoginActivity extends Activity implements OnClickListener,
 	private ScrollView scrollView;
 	private EditText et_account, et_password;
 
+	private LoadingDialog mLoadIngDialog;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_login);
 		findViewById();
-		setListener(); 
+		setListener();
+
+		mLoadIngDialog = new LoadingDialog(this).initText(getResources()
+				.getString(R.string.logining));
 
 		// 自动登录
 		String username = PreferenceUtils.getPrefString(LoginActivity.this,
@@ -56,12 +63,12 @@ public class LoginActivity extends Activity implements OnClickListener,
 				MemberConstant.PASSWORD, null);
 
 		if (!TextUtils.isEmpty(username) && !TextUtils.isEmpty(password)) {
+			
 			login(username, password);
 		}
-		
+
 		PreferenceUtils.setPrefInt(getApplicationContext(),
-				MemberConstant.LOGIN_STATUS,
-				MemberConstant.LOGIN_OUT);
+				MemberConstant.LOGIN_STATUS, MemberConstant.LOGIN_OUT);
 	}
 
 	private void findViewById() {
@@ -87,7 +94,7 @@ public class LoginActivity extends Activity implements OnClickListener,
 		switch (view.getId()) {
 
 		case R.id.btn_login:
-			
+
 			if (!NetworkStatusUtil.isConnected(this)) {
 				Toast.makeText(this, "当前网络不可用，请检查网络设置", Toast.LENGTH_SHORT)
 						.show();
@@ -143,9 +150,15 @@ public class LoginActivity extends Activity implements OnClickListener,
 
 		Device device = DeviceUtils.getDeviceInfo(getApplicationContext());
 		device.setPlatform(PlatformType.AndroidScreen.platform()); // 设死成3
+		device.setDeviceID(new DeviceIDUtil().getDeviceID());
 
 		new LoginEmployee(this).loginEmployee(userName, password, device,
 				new RequestCallBack() {
+
+					@Override
+					public void onStart() {
+						mLoadIngDialog.show();
+					}
 
 					@Override
 					public void onSuccess(ResponseData response) {
@@ -179,6 +192,7 @@ public class LoginActivity extends Activity implements OnClickListener,
 						PreferenceUtils.setPrefInt(getApplicationContext(),
 								MemberConstant.DEVICE_ID,
 								employee.getDeviceID());
+						new DeviceIDUtil().saveDeviceIDToSDCard(employee.getDeviceID());
 
 						String token = XGPushConfig
 								.getToken(getApplicationContext());
@@ -244,19 +258,17 @@ public class LoginActivity extends Activity implements OnClickListener,
 					}
 
 					@Override
-					public void onStart() {
-					}
-
-					@Override
 					public void onFinish() {
+						mLoadIngDialog.dismiss();
 					}
 
 					@Override
 					public void onFailure(int statusCode, Header[] headers,
 							String responseString, Throwable throwable) {
-						
+
 						L.e(LoginActivity.this, "statusCode : " + statusCode);
-						L.e(LoginActivity.this, "登录失败, 返回的responseString : " + responseString);
+						L.e(LoginActivity.this, "登录失败, 返回的responseString : "
+								+ responseString);
 						L.e(LoginActivity.this, throwable.toString());
 					}
 				});

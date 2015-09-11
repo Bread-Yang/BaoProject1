@@ -115,8 +115,8 @@ public class MessageReceiver extends XGPushBaseReceiver {
 			// APP自己处理通知被清除后的相关动作
 			text = "通知被清除 :" + message;
 		}
-		Toast.makeText(context, "广播接收到通知被点击:" + message.toString(),
-				Toast.LENGTH_SHORT).show();
+//		Toast.makeText(context, "广播接收到通知被点击:" + message.toString(),
+//				Toast.LENGTH_SHORT).show();
 		// 获取自定义key-value
 		String customContent = message.getCustomContent();
 		if (customContent != null && customContent.length() != 0) {

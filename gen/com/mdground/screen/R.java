@@ -17,8 +17,9 @@ public final class R {
         public static final int abc_slide_out_top=0x7f040005;
         public static final int left_push_in=0x7f040006;
         public static final int left_push_out=0x7f040007;
-        public static final int right_push_in=0x7f040008;
-        public static final int right_push_out=0x7f040009;
+        public static final int loading=0x7f040008;
+        public static final int right_push_in=0x7f040009;
+        public static final int right_push_out=0x7f04000a;
     }
     public static final class attr {
         /**  Custom divider drawable to use for elements in the action bar. 
@@ -1442,15 +1443,27 @@ containing a value of this type.
         public static final int ic_launcher=0x7f020066;
         public static final int id_nor=0x7f020067;
         public static final int line=0x7f020068;
-        public static final int lock_nor=0x7f020069;
-        public static final int login_bg=0x7f02006a;
-        public static final int login_button_selector=0x7f02006b;
-        public static final int login_line=0x7f02006c;
-        public static final int page=0x7f02006d;
-        public static final int photo=0x7f02006e;
-        public static final int photo2=0x7f02006f;
+        public static final int loading_1=0x7f020069;
+        public static final int loading_10=0x7f02006a;
+        public static final int loading_2=0x7f02006b;
+        public static final int loading_3=0x7f02006c;
+        public static final int loading_4=0x7f02006d;
+        public static final int loading_5=0x7f02006e;
+        public static final int loading_6=0x7f02006f;
+        public static final int loading_7=0x7f020070;
+        public static final int loading_8=0x7f020071;
+        public static final int loading_9=0x7f020072;
+        public static final int loading_bg=0x7f020073;
+        public static final int lock_nor=0x7f020074;
+        public static final int login_bg=0x7f020075;
+        public static final int login_button_selector=0x7f020076;
+        public static final int login_line=0x7f020077;
+        public static final int page=0x7f020078;
+        public static final int photo=0x7f020079;
+        public static final int photo2=0x7f02007a;
     }
     public static final class id {
+        public static final int LoginID=0x7f08005e;
         public static final int action_bar=0x7f080030;
         public static final int action_bar_activity_content=0x7f080015;
         public static final int action_bar_container=0x7f08002f;
@@ -1462,7 +1475,7 @@ containing a value of this type.
         public static final int action_menu_divider=0x7f080016;
         public static final int action_menu_presenter=0x7f080017;
         public static final int action_mode_close_button=0x7f080038;
-        public static final int action_settings=0x7f080064;
+        public static final int action_settings=0x7f080066;
         public static final int activity_chooser_view_content=0x7f080039;
         public static final int always=0x7f08000b;
         public static final int alwaysScroll=0x7f080027;
@@ -1478,7 +1491,7 @@ containing a value of this type.
         public static final int clip_vertical=0x7f080024;
         public static final int collapseActionView=0x7f08000d;
         public static final int columnWidth=0x7f08002b;
-        public static final int current_num=0x7f080061;
+        public static final int current_num=0x7f080063;
         public static final int default_activity_button=0x7f08003c;
         public static final int dialog=0x7f08000e;
         public static final int disableHome=0x7f080008;
@@ -1493,7 +1506,7 @@ containing a value of this type.
         public static final int fill=0x7f080023;
         public static final int fill_horizontal=0x7f080021;
         public static final int fill_vertical=0x7f08001f;
-        public static final int gridview=0x7f080062;
+        public static final int gridview=0x7f080064;
         public static final int gvp=0x7f080059;
         public static final int home=0x7f080014;
         public static final int homeAsUp=0x7f080005;
@@ -1502,17 +1515,18 @@ containing a value of this type.
         public static final int ifRoom=0x7f08000a;
         public static final int image=0x7f08003b;
         public static final int iv_account=0x7f080052;
-        public static final int iv_avatar=0x7f08005f;
+        public static final int iv_avatar=0x7f080061;
         public static final int iv_clear_account=0x7f080054;
         public static final int iv_clear_password=0x7f080057;
         public static final int iv_password=0x7f080055;
         public static final int left=0x7f08001c;
-        public static final int line=0x7f08005d;
+        public static final int line=0x7f08005f;
         public static final int listMode=0x7f080001;
         public static final int list_item=0x7f08003d;
+        public static final int loading_gif=0x7f08005d;
         public static final int login_root_layout=0x7f080050;
         public static final int middle=0x7f080012;
-        public static final int name_txt=0x7f080060;
+        public static final int name_txt=0x7f080062;
         public static final int never=0x7f080009;
         public static final int none=0x7f080010;
         public static final int normal=0x7f080000;
@@ -1523,7 +1537,7 @@ containing a value of this type.
         public static final int radio=0x7f080043;
         public static final int right=0x7f08001d;
         public static final int scrollView=0x7f080051;
-        public static final int scrollview=0x7f08005e;
+        public static final int scrollview=0x7f080060;
         public static final int search_badge=0x7f080046;
         public static final int search_bar=0x7f080045;
         public static final int search_button=0x7f080047;
@@ -1543,7 +1557,7 @@ containing a value of this type.
         public static final int split_action_bar=0x7f080032;
         public static final int submit_area=0x7f08004d;
         public static final int tabMode=0x7f080002;
-        public static final int textview=0x7f080063;
+        public static final int textview=0x7f080065;
         public static final int title=0x7f08003f;
         public static final int top=0x7f08001a;
         public static final int top_action_bar=0x7f080034;
@@ -1606,11 +1620,12 @@ containing a value of this type.
         public static final int activity_login=0x7f030018;
         public static final int activity_main=0x7f030019;
         public static final int activity_test=0x7f03001a;
-        public static final int item_normal_docotor=0x7f03001b;
-        public static final int item_num=0x7f03001c;
-        public static final int item_num_single=0x7f03001d;
-        public static final int item_single_big_docotor=0x7f03001e;
-        public static final int support_simple_spinner_dropdown_item=0x7f03001f;
+        public static final int dialog_loading=0x7f03001b;
+        public static final int item_normal_docotor=0x7f03001c;
+        public static final int item_num=0x7f03001d;
+        public static final int item_num_single=0x7f03001e;
+        public static final int item_single_big_docotor=0x7f03001f;
+        public static final int support_simple_spinner_dropdown_item=0x7f030020;
     }
     public static final class menu {
         public static final int main=0x7f0c0000;
@@ -1662,6 +1677,7 @@ containing a value of this type.
         public static final int current_num=0x7f060010;
         public static final int hello_world=0x7f060002;
         public static final int login=0x7f060012;
+        public static final int logining=0x7f060015;
         public static final int next_num=0x7f060011;
         public static final int password=0x7f060014;
     }
@@ -1694,11 +1710,13 @@ containing a value of this type.
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
 
+
     
 
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to
             backward-compatibility can go here.
+
 
         
          */
@@ -1926,6 +1944,7 @@ containing a value of this type.
         public static final int Widget_AppCompat_ProgressBar=0x7f07000c;
         public static final int Widget_AppCompat_ProgressBar_Horizontal=0x7f07000b;
         public static final int Widget_AppCompat_Spinner_DropDown_ActionBar=0x7f070024;
+        public static final int loadingDialog=0x7f07009e;
     }
     public static final class styleable {
         /**  ============================================ 
