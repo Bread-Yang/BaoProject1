@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mdground.screen"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="1.0.9.24" >
 
     <uses-sdk
         android:minSdkVersion="17"
@@ -45,17 +45,14 @@
         <activity
             android:name=".activity.LoginActivity"
             android:launchMode="singleTop"
-            android:theme="@android:style/Theme.Light.NoTitleBar"
             android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Light.NoTitleBar"
             android:windowSoftInputMode="adjustResize" >
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-                
                 <category android:name="android.intent.category.HOME" />
-                
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -64,6 +61,7 @@
             android:launchMode="singleTop"
             android:screenOrientation="landscape" >
         </activity>
+        <activity android:name="net.hockeyapp.android.UpdateActivity" />
 
         <!-- 【必须】 (2.30及以上版新增)展示通知的activity -->
         <!-- 【必须】 exported设置为true -->
@@ -78,9 +76,18 @@
             </intent-filter>
         </activity>
 
+        <receiver android:name="com.mdground.screen.receiver.ConnectChangeReceiver" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.net.wifi.STATE_CHANGE" />
+                <action android:name="android.net.wifi.RSSI_CHANGED" />
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
         <!-- 【必须】 信鸽receiver广播接收 -->
         <receiver
-            android:name="com.tencent.android.tpush.XGPushReceiver" 
+            android:name="com.tencent.android.tpush.XGPushReceiver"
             android:process=":xg_service_v2" >
             <intent-filter android:priority="0x7fffffff" >
 
@@ -121,7 +128,9 @@
 
         <!-- 【可选】APP实现的Receiver，用于接收消息透传和操作结果的回调，请根据需要添加 -->
         <!-- YOUR_PACKAGE_PATH.CustomPushReceiver需要改为自己的Receiver： -->
-        <receiver android:name="com.mdground.screen.receiver.MessageReceiver" >
+        <receiver
+            android:name="com.mdground.screen.receiver.MessageReceiver"
+            android:exported="false" >
             <intent-filter>
 
                 <!-- 接收消息透传 -->
@@ -130,14 +139,17 @@
                 <action android:name="com.tencent.android.tpush.action.FEEDBACK" />
             </intent-filter>
         </receiver>
-       <!--  <receiver android:name="com.mdground.screen.receiver.BootBroadcastReceiver" >
+        <!--
+        <receiver android:name="com.mdground.screen.receiver.BootBroadcastReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" >
                 </action>
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </receiver> -->
+        </receiver>
+        -->
+
 
         <!-- 【必须】 请修改为APP的AccessId，“21”开头的10位数字，中间没空格 -->
         <meta-data

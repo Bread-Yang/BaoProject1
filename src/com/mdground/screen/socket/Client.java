@@ -7,13 +7,13 @@ import java.net.Socket;
 
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.content.Intent;
-
 import com.mdground.screen.MedicalAppliction;
 import com.mdground.screen.constant.MemberConstant;
 import com.mdground.screen.utils.L;
 import com.mdground.screen.utils.PreferenceUtils;
+
+import android.content.Context;
+import android.content.Intent;
 
 public class Client extends Thread {
 

@@ -1,5 +1,8 @@
 package com.mdground.screen.activity;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,6 +23,27 @@ import org.mdground.api.bean.Doctor;
 import org.mdground.api.server.clinic.GetAppointmentInfoListByDoctor;
 import org.mdground.api.server.global.GetDoctorList;
 
+import com.baidu.speechsynthesizer.SpeechSynthesizer;
+import com.baidu.speechsynthesizer.SpeechSynthesizerListener;
+import com.baidu.speechsynthesizer.publicutility.DataInfoUtils;
+import com.baidu.speechsynthesizer.publicutility.SpeechError;
+import com.baidu.speechsynthesizer.publicutility.SpeechLogger;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mdground.screen.R;
+import com.mdground.screen.service.DataService;
+import com.mdground.screen.utils.L;
+import com.mdground.screen.utils.UpdateManager;
+import com.mdground.screen.view.FlickerTextView;
+import com.mdground.screen.view.GridViewPager;
+import com.mdground.screen.view.TwoWayGridView;
+import com.mdground.screen.view.dialog.LoadingDialog;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+
+import android.R.integer;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
@@ -43,28 +67,11 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.baidu.speechsynthesizer.SpeechSynthesizer;
-import com.baidu.speechsynthesizer.SpeechSynthesizerListener;
-import com.baidu.speechsynthesizer.publicutility.DataInfoUtils;
-import com.baidu.speechsynthesizer.publicutility.SpeechError;
-import com.baidu.speechsynthesizer.publicutility.SpeechLogger;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.mdground.screen.R;
-import com.mdground.screen.utils.L;
-import com.mdground.screen.view.FlickerTextView;
-import com.mdground.screen.view.GridViewPager;
-import com.mdground.screen.view.TwoWayGridView;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.CrashManagerListener;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-public class MainActivity extends BaseActivity implements
-		SpeechSynthesizerListener {
+public class MainActivity extends BaseActivity implements SpeechSynthesizerListener {
 
 	private GridViewPager viewPager;
 	private DoctorAdapter doctorAdapter;
@@ -72,7 +79,7 @@ public class MainActivity extends BaseActivity implements
 	private int totalNum;
 	private int currentPage = 1;
 	private static final int PAGE_SIZE = 3;
-	private Timer timer; 
+	private Timer timer;
 	private static final int CHANGE_PAGE = 0x01;
 	private View pageView;
 	private ArrayList<Doctor> doctorsArray = new ArrayList<Doctor>();
@@ -81,8 +88,8 @@ public class MainActivity extends BaseActivity implements
 
 	private SpeechSynthesizer speechSynthesizer;
 	/** 指定license路径，需要保证该路径的可读写权限 */
-	private static final String LICENCE_FILE_NAME = Environment
-			.getExternalStorageDirectory() + "/tts/baidu_tts_licence.dat";
+	private static final String LICENCE_FILE_NAME = Environment.getExternalStorageDirectory()
+			+ "/tts/baidu_tts_licence.dat";
 
 	private Queue<String> speechQueue = new LinkedList<String>();
 
@@ -95,6 +102,8 @@ public class MainActivity extends BaseActivity implements
 
 	private SparseArray<View> registeredViews = new SparseArray<View>();
 
+	private LoadingDialog mLoadIngDialog;
+
 	class ClientReciver extends BroadcastReceiver {
 
 		@Override
@@ -102,11 +111,11 @@ public class MainActivity extends BaseActivity implements
 			if ("com.mdground.message".equals(intent.getAction())) {
 				String message = intent.getStringExtra("message");
 
-//				Toast.makeText(MainActivity.this,
-//						intent.getStringExtra("message"), Toast.LENGTH_SHORT)
-//						.show();
+				// Toast.makeText(MainActivity.this,
+				// intent.getStringExtra("message"), Toast.LENGTH_SHORT)
+				// .show();
 
-				L.e(MainActivity.this, "app发过来的socket信息是 : " + message);
+//				L.e(MainActivity.this, "app发过来的socket信息是 : " + message);
 
 				JSONObject json;
 
@@ -122,16 +131,15 @@ public class MainActivity extends BaseActivity implements
 						// 如果当前发过来的opNO是正在播放的,则不添加进队列里面
 
 						// 当正在播放林医生的叫号时,这时收到黄医生的叫号,则继续播放林医生的叫号,不过要在导诊屏上的黄医生的位置显示黄医生的叫号
-						if (!isOpNoTextViewVisible(doctorID, opNO)) {
+						if (!isOpNoTextViewVisible(doctorID)) {
 							startCallPatient(doctorID, opNO);
 						}
 
 						// 当正在播放4001号的叫号时,在播放两次声音的时间之内,又收到了一次同样是4001号的叫号,则只播放两次,而不是播放四次4001的叫号
 						if (currentSpeechMessage != null) {
-							CallAppointment currentCall = new CallAppointment(
-									currentSpeechMessage);
+							CallAppointment currentCall = new CallAppointment(currentSpeechMessage);
 							if (currentCall.getOpNO() == opNO) {
-								return;  
+								return;
 							}
 						}
 
@@ -142,8 +150,7 @@ public class MainActivity extends BaseActivity implements
 						} else {
 
 							for (String callMessage : speechQueue) {
-								if (opNO == new JSONObject(callMessage)
-										.getInt("OPNo")) {
+								if (opNO == new JSONObject(callMessage).getInt("OPNo")) {
 									return;
 								}
 							}
@@ -159,12 +166,12 @@ public class MainActivity extends BaseActivity implements
 
 							// 重新拉一次数据
 
-							for (int i = 0; i < doctorsArray.size(); i++) {
-								getAppointmentListByDoctor(i,
-										(int) doctorsArray.get(i).getDoctorID());
-							}
+							getAppointmentListByDoctor(doctorsIndex.get(String.valueOf(doctorID)), doctorID);
+							// for (int i = 0; i < doctorsArray.size(); i++) {
+							// getAppointmentListByDoctor(i, (int)
+							// doctorsArray.get(i).getDoctorID());
+							// }
 						} else if ((OPStatus & Appointment.STATUS_FINISH) != 0) { // 结束
-							L.e(MainActivity.this, "bbbbb11111");
 							hideOpNO(doctorID, opNO);
 						}
 					}
@@ -180,34 +187,47 @@ public class MainActivity extends BaseActivity implements
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if ("com.mdground.screen.xgPush".equals(intent.getAction())) {
-//				Toast.makeText(MainActivity.this, "收到推送", Toast.LENGTH_SHORT)
-//						.show();
+				// Toast.makeText(MainActivity.this, "收到推送", Toast.LENGTH_SHORT)
+				// .show();
 
 				String title = intent.getStringExtra("title");
 				String content = intent.getStringExtra("content");
 				String customContent = intent.getStringExtra("customContent");
-				L.e(MainActivity.this, "拿到的title : " + title);
-				L.e(MainActivity.this, "拿到的content : " + content);
+//				L.e(MainActivity.this, "拿到的title : " + title);
+//				L.e(MainActivity.this, "拿到的content : " + content);
+//				L.e(MainActivity.this, "拿到的customContent : " + customContent);
 
-				L.e(MainActivity.this, "收到推送");
+//				L.e(MainActivity.this, "收到推送");
 
 				try {
 					JSONObject json = new JSONObject(customContent);
 					String functionName = json.getString("FunctionName");
 
+					// 更新列表的推送
 					if ("RefreshAppointment".equals(functionName)) {
 						// Toast.makeText(getApplicationContext(),
 						// "收到重新更新列表的推送",
 						// Toast.LENGTH_SHORT).show();
 
-						for (int i = 0; i < doctorsArray.size(); i++) {
-							((FlickerTextView) registeredViews.get(i)
-									.findViewById(R.id.current_num))
-									.setVisibility(View.INVISIBLE);
+						int doctorId = Integer.valueOf(content);
 
-							getAppointmentListByDoctor(i, (int) doctorsArray
-									.get(i).getDoctorID());
+						Integer index = doctorsIndex.get(String.valueOf(doctorId));
+						
+						if (index != null) {
+							getAppointmentListByDoctor(index, doctorId);
 						}
+
+						// for (int i = 0; i < doctorsArray.size(); i++) {
+						// ((FlickerTextView) registeredViews.get(i)
+						// .findViewById(R.id.current_num))
+						// .setVisibility(View.INVISIBLE);
+						//
+						// getAppointmentListByDoctor(i, (int) doctorsArray
+						// .get(i).getDoctorID());
+						// }
+					} else if ("UpgradeScreenVersion".equals(functionName)) { // 更新
+						UpdateManager manager = new UpdateManager(MainActivity.this);
+						manager.showDownloadDialog();
 					}
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -225,6 +245,58 @@ public class MainActivity extends BaseActivity implements
 		initService();
 		initBaiduTTS();
 		getDoctorList();
+
+		mLoadIngDialog = new LoadingDialog(this).initText(getResources().getString(R.string.logining));
+
+//		 new Handler().postDelayed(new Runnable() {
+//		 public void run() {
+//		 UpdateManager manager = new UpdateManager(MainActivity.this);
+//		 manager.showDownloadDialog();
+//		 }
+//		 }, 10000);
+
+		// new Handler().postDelayed(new Runnable() {
+		// public void run() {
+		// int[] i = new int[2];
+		// i[3] = 0;
+		// }
+		// }, 20000);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		CrashManager.register(this, "503880ea15f946c5a47042feda3e6517", new MyCrashManagerListener());
+	}
+
+	private static class MyCrashManagerListener extends CrashManagerListener {
+
+		public boolean shouldAutoUploadCrashes() {
+			return true;
+		}
+
+		public String getDescription() {
+			String description = "";
+
+			try {
+				Process process = Runtime.getRuntime().exec("logcat -d *:E");
+				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+				StringBuilder log = new StringBuilder();
+				String line;
+				while ((line = bufferedReader.readLine()) != null) {
+					log.append(line);
+					log.append(System.getProperty("line.separator"));
+				}
+				bufferedReader.close();
+
+				description = log.toString();
+			} catch (IOException e) {
+			}
+
+			return description;
+		}
 	}
 
 	private void findViewById() {
@@ -255,13 +327,12 @@ public class MainActivity extends BaseActivity implements
 
 	private void initService() {
 		mClientRecive = new ClientReciver();
-		registerReceiver(mClientRecive,
-				new IntentFilter("com.mdground.message"));
-		startService(new Intent("com.mdground.screen.service.DataService"));
+		registerReceiver(mClientRecive, new IntentFilter("com.mdground.message"));
+		// startService(new Intent("com.mdground.screen.service.DataService"));
+		startService(new Intent(this, DataService.class));
 
 		xgReceiver = new XGPushReceiver();
-		registerReceiver(xgReceiver, new IntentFilter(
-				"com.mdground.screen.xgPush"));
+		registerReceiver(xgReceiver, new IntentFilter("com.mdground.screen.xgPush"));
 	}
 
 	private void initBaiduTTS() {
@@ -275,81 +346,154 @@ public class MainActivity extends BaseActivity implements
 		System.loadLibrary("bd_etts");
 		System.loadLibrary("bds");
 
-		speechSynthesizer = SpeechSynthesizer.newInstance(
-				SpeechSynthesizer.SYNTHESIZER_AUTO, getApplicationContext(),
+		speechSynthesizer = SpeechSynthesizer.newInstance(SpeechSynthesizer.SYNTHESIZER_AUTO, getApplicationContext(),
 				"holder", this);
 		// 请替换为语音开发者平台注册应用得到的apikey和secretkey (在线授权)
-		speechSynthesizer.setApiKey("Dj4jyvL8cO8STPQ7PWY8YmHM",
-				"a9ac5facd39ebfcab3b0bceb24606d90");
+		speechSynthesizer.setApiKey("Dj4jyvL8cO8STPQ7PWY8YmHM", "a9ac5facd39ebfcab3b0bceb24606d90");
 		// 请替换为语音开发者平台上注册应用得到的App ID (离线授权)
 		speechSynthesizer.setAppId("6691671");
 		// 设置临时授权文件路径，LICENCE_FILE_NAME请替换成临时授权文件的实际路径，仅在使用临时license文件时需要进行设置，如果在[应用管理]中开通了离线授权，不需要设置该参数，建议将该行代码删除
 		// speechSynthesizer.setParam(SpeechSynthesizer.PARAM_TTS_LICENCE_FILE,
 		// LICENCE_FILE_NAME);
 		// TTS所需的资源文件，可以放在任意可读目录，可以任意改名
-		String ttsTextModelFilePath = getApplicationContext()
-				.getApplicationInfo().dataDir + "/lib/libbd_etts_text.dat.so";
-		String ttsSpeechModelFilePath = getApplicationContext()
-				.getApplicationInfo().dataDir
+		String ttsTextModelFilePath = getApplicationContext().getApplicationInfo().dataDir
+				+ "/lib/libbd_etts_text.dat.so";
+		String ttsSpeechModelFilePath = getApplicationContext().getApplicationInfo().dataDir
 				+ "/lib/libbd_etts_speech_female.dat.so";
 
 		// 以下参数仅对离线引擎生效
-		speechSynthesizer.setParam(SpeechSynthesizer.PARAM_TTS_THREAD_PRIORITY,
-				"1");
-		speechSynthesizer.setParam(SpeechSynthesizer.PARAM_VOCODER_OPTIM_LEVEL,
-				"0");
-		speechSynthesizer.setParam(SpeechSynthesizer.PARAM_TTS_TEXT_MODEL_FILE,
-				ttsTextModelFilePath);
-		speechSynthesizer.setParam(
-				SpeechSynthesizer.PARAM_TTS_SPEECH_MODEL_FILE,
-				ttsSpeechModelFilePath);
-//		speechSynthesizer.setParam(SpeechSynthesizer.PARAM_VOLUME, "9"); 
+		speechSynthesizer.setParam(SpeechSynthesizer.PARAM_TTS_THREAD_PRIORITY, "1");
+		speechSynthesizer.setParam(SpeechSynthesizer.PARAM_VOCODER_OPTIM_LEVEL, "0");
+		speechSynthesizer.setParam(SpeechSynthesizer.PARAM_TTS_TEXT_MODEL_FILE, ttsTextModelFilePath);
+		speechSynthesizer.setParam(SpeechSynthesizer.PARAM_TTS_SPEECH_MODEL_FILE, ttsSpeechModelFilePath);
+		speechSynthesizer.setParam(SpeechSynthesizer.PARAM_VOLUME, "9");
+		// speechSynthesizer.setParam(SpeechSynthesizer.PARAM_PITCH, "9");
 		speechSynthesizer.setParam(SpeechSynthesizer.PARAM_SPEED, "3");
 
 		DataInfoUtils.verifyDataFile(ttsTextModelFilePath);
-		DataInfoUtils.getDataFileParam(ttsTextModelFilePath,
-				DataInfoUtils.TTS_DATA_PARAM_DATE);
-		DataInfoUtils.getDataFileParam(ttsTextModelFilePath,
-				DataInfoUtils.TTS_DATA_PARAM_SPEAKER);
-		DataInfoUtils.getDataFileParam(ttsTextModelFilePath,
-				DataInfoUtils.TTS_DATA_PARAM_GENDER);
-		DataInfoUtils.getDataFileParam(ttsTextModelFilePath,
-				DataInfoUtils.TTS_DATA_PARAM_CATEGORY);
-		DataInfoUtils.getDataFileParam(ttsTextModelFilePath,
-				DataInfoUtils.TTS_DATA_PARAM_LANGUAGE);
+		DataInfoUtils.getDataFileParam(ttsTextModelFilePath, DataInfoUtils.TTS_DATA_PARAM_DATE);
+		DataInfoUtils.getDataFileParam(ttsTextModelFilePath, DataInfoUtils.TTS_DATA_PARAM_SPEAKER);
+		DataInfoUtils.getDataFileParam(ttsTextModelFilePath, DataInfoUtils.TTS_DATA_PARAM_GENDER);
+		DataInfoUtils.getDataFileParam(ttsTextModelFilePath, DataInfoUtils.TTS_DATA_PARAM_CATEGORY);
+		DataInfoUtils.getDataFileParam(ttsTextModelFilePath, DataInfoUtils.TTS_DATA_PARAM_LANGUAGE);
 		speechSynthesizer.initEngine();
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 	}
 
 	private void getDoctorList() {
-		new GetDoctorList(getApplicationContext())
-				.getDoctorList(new RequestCallBack() {
+		new GetDoctorList(getApplicationContext()).getDoctorList(new RequestCallBack() {
+
+			@Override
+			public void onSuccess(ResponseData response) {
+				L.e(MainActivity.this, "获取医生列表 : content : " + response.getContent());
+
+				try {
+					JSONArray doctorArray = new JSONArray(response.getContent());
+
+					for (int i = 0; i < doctorArray.length(); i++) {
+						JSONObject item = doctorArray.getJSONObject(i);
+						Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+						Doctor doctor = gson.fromJson(item.toString(), Doctor.class);
+
+						doctorsArray.add(doctor);
+						doctorsIndex.put(String.valueOf(doctor.getDoctorID()), i);
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+
+			}
+
+			@Override
+			public void onStart() {
+				mLoadIngDialog.show();
+			}
+
+			@Override
+			public void onFinish() {
+				mLoadIngDialog.dismiss();
+
+				totalNum = doctorsArray.size();
+				if (doctorsArray.size() > 1) {
+					pageView.setVisibility(View.VISIBLE);
+				} else {
+					pageView.setVisibility(View.INVISIBLE);
+					viewPager.setColumnNum(1);
+				}
+				tv_page.setText("1/" + getTotalPage(totalNum));
+				doctorAdapter = new DoctorAdapter(doctorsArray);
+				viewPager.setAdapter(doctorAdapter);
+
+				startPageSwitch();
+
+				new Handler().postDelayed(new Runnable() {
+
+					@Override
+					public void run() {
+						for (int i = 0; i < doctorsArray.size(); i++) {
+							getAppointmentListByDoctor(i, (int) doctorsArray.get(i).getDoctorID());
+						}
+					}
+				}, 2000);
+			}
+
+			@Override
+			public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+				mLoadIngDialog.dismiss();
+
+				new Handler().postDelayed(new Runnable() {
+					public void run() {
+						getDoctorList();
+					}
+				}, 5000);
+			}
+		});
+	}
+
+	private void getAppointmentListByDoctor(final int index, final int doctorId) {
+
+		new GetAppointmentInfoListByDoctor(getApplicationContext())
+				.getAppointmentInfoListByDoctor(Appointment.STATUS_WATTING, doctorId, new RequestCallBack() {
 
 					@Override
 					public void onSuccess(ResponseData response) {
-						L.e(MainActivity.this,
-								"获取医生列表 : content : " + response.getContent());
+						L.e(MainActivity.this, "医生(" + index + ") 拿到的预约是 content : " + response.getContent());
 
 						try {
-							JSONArray doctorArray = new JSONArray(response
-									.getContent());
+							JSONArray jsonArray = new JSONArray(response.getContent());
 
-							for (int i = 0; i < doctorArray.length(); i++) {
-								JSONObject item = doctorArray.getJSONObject(i);
-								Gson gson = new GsonBuilder().setDateFormat(
-										"yyyy-MM-dd HH:mm:ss").create();
-								Doctor doctor = gson.fromJson(item.toString(),
-										Doctor.class);
+							final ArrayList<Appointment> appointmentArray = new ArrayList<Appointment>();
 
-								doctorsArray.add(doctor);
-								doctorsIndex.put(
-										String.valueOf(doctor.getDoctorID()), i);
+							for (int i = 0; i < jsonArray.length(); i++) {
+								JSONObject item = jsonArray.getJSONObject(i);
+								Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+								Appointment appointment = gson.fromJson(item.toString(), Appointment.class);
+
+//								L.e(MainActivity.this, "appointment.getOPStatus() : " + appointment.getOPStatus());
+
+								if ((appointment.getOPStatus() & Appointment.STATUS_WATTING) != 0
+										&& (appointment.getOPStatus() & Appointment.STATUS_DIAGNOSING) == 0) {
+									appointmentArray.add(appointment);
+								}
+
 							}
+
+							TwoWayGridView gridView = ((TwoWayGridView) registeredViews.get(index)
+									.findViewById(R.id.gridview));
+
+							gridView.setAdapter(new NumAdapter(appointmentArray,
+									doctorAdapter.getItemViewType(index) == DoctorAdapter.DOCOTOR_ITEM_SINGLE));
+
+							// viewPager.notifyDataSetChanged();
+
+							Collections.sort(appointmentArray);
+
+							allDoctorAppointmentArray.put(String.valueOf(doctorId), appointmentArray);
+
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
-
 					}
 
 					@Override
@@ -359,118 +503,19 @@ public class MainActivity extends BaseActivity implements
 
 					@Override
 					public void onFinish() {
-						totalNum = doctorsArray.size();
-						if (doctorsArray.size() > 1) {
-							pageView.setVisibility(View.VISIBLE);
-						} else {
-							pageView.setVisibility(View.INVISIBLE);
-							viewPager.setColumnNum(1);
-						}
-						tv_page.setText("1/" + getTotalPage(totalNum));
-						doctorAdapter = new DoctorAdapter(doctorsArray);
-						viewPager.setAdapter(doctorAdapter);
-
-						startPageSwitch();
-
-						new Handler().postDelayed(new Runnable() {
-
-							@Override
-							public void run() {
-								for (int i = 0; i < doctorsArray.size(); i++) {
-									getAppointmentListByDoctor(i,
-											(int) doctorsArray.get(i)
-													.getDoctorID());
-								}
-							}
-						}, 2000);
 					}
 
 					@Override
-					public void onFailure(int statusCode, Header[] headers,
-							String responseString, Throwable throwable) {
-
+					public void onFailure(int statusCode, Header[] headers, String responseString,
+							Throwable throwable) {
+						
+						new Handler().postDelayed(new Runnable() {
+							public void run() {
+								getAppointmentListByDoctor(index, doctorId);
+							}
+						}, 5000);
 					}
 				});
-	}
-
-	private void getAppointmentListByDoctor(final int index, final int doctorId) {
-
-		new GetAppointmentInfoListByDoctor(getApplicationContext())
-				.getAppointmentInfoListByDoctor(Appointment.STATUS_WATTING,
-						doctorId, new RequestCallBack() {
-
-							@Override
-							public void onSuccess(ResponseData response) {
-								L.e(MainActivity.this,
-										"医生(" + index + ") 拿到的预约是 content : "
-												+ response.getContent());
-
-								try {
-									JSONArray jsonArray = new JSONArray(
-											response.getContent());
-
-									final ArrayList<Appointment> appointmentArray = new ArrayList<Appointment>();
-
-									for (int i = 0; i < jsonArray.length(); i++) {
-										JSONObject item = jsonArray
-												.getJSONObject(i);
-										Gson gson = new GsonBuilder()
-												.setDateFormat(
-														"yyyy-MM-dd HH:mm:ss")
-												.create();
-										Appointment appointment = gson
-												.fromJson(item.toString(),
-														Appointment.class);
-
-										L.e(MainActivity.this,
-												"appointment.getOPStatus() : "
-														+ appointment
-																.getOPStatus());
-
-										if ((appointment.getOPStatus() & Appointment.STATUS_WATTING) != 0
-												&& (appointment.getOPStatus() & Appointment.STATUS_DIAGNOSING) == 0) {
-											appointmentArray.add(appointment);
-										}
-									}
-									
-									TwoWayGridView gridView = ((TwoWayGridView) registeredViews
-											.get(index).findViewById(
-													R.id.gridview));
-
-									gridView.setAdapter(new NumAdapter(
-											appointmentArray,
-											doctorAdapter
-													.getItemViewType(index) == DoctorAdapter.DOCOTOR_ITEM_SINGLE));
-
-									// viewPager.notifyDataSetChanged();
-
-									Collections.sort(appointmentArray);
-
-									allDoctorAppointmentArray.put(
-											String.valueOf(doctorId),
-											appointmentArray);
-
-								} catch (JSONException e) {
-									e.printStackTrace();
-								}
-							}
-
-							@Override
-							public void onStart() {
-
-							}
-
-							@Override
-							public void onFinish() {
-							}
-
-							@Override
-							public void onFailure(int statusCode,
-									Header[] headers, String responseString,
-									Throwable throwable) {
-
-							}
-						});
 	}
 
 	class DoctorAdapter extends BaseAdapter {
@@ -501,38 +546,27 @@ public class MainActivity extends BaseActivity implements
 
 		@SuppressLint("NewApi")
 		@Override
-		public View getView(final int position, View convertView,
-				ViewGroup parent) {
+		public View getView(final int position, View convertView, ViewGroup parent) {
 
 			DocotorViewHolder holder = null;
 			DocotorSingleViewHolder singleHolder = null;
 
-			Doctor docotorBean = list.get(position);
+			Doctor doctorBean = list.get(position);
 
 			if (getItemViewType(position) == DOCOTOR_ITEM) {
 
-				if (null == convertView
-						|| null == convertView
-								.getTag(R.layout.item_normal_docotor)) {
-					convertView = inflater.inflate(
-							R.layout.item_normal_docotor, null);
+				if (null == convertView || null == convertView.getTag(R.layout.item_normal_docotor)) {
+					convertView = inflater.inflate(R.layout.item_normal_docotor, null);
 					holder = new DocotorViewHolder();
-					holder.iv_avatar = (ImageView) convertView
-							.findViewById(R.id.iv_avatar);
-					holder.tv_name = (TextView) convertView
-							.findViewById(R.id.name_txt);
-					holder.tv_opNO = (FlickerTextView) convertView
-							.findViewById(R.id.current_num);
-					holder.gridView = (TwoWayGridView) convertView
-							.findViewById(R.id.gridview);
-					holder.scrollView = (ScrollView) convertView
-							.findViewById(R.id.scrollview);
-					holder.iv_line = (ImageView) convertView
-							.findViewById(R.id.line);
+					holder.iv_avatar = (ImageView) convertView.findViewById(R.id.iv_avatar);
+					holder.tv_name = (TextView) convertView.findViewById(R.id.name_txt);
+					holder.tv_opNO = (FlickerTextView) convertView.findViewById(R.id.current_num);
+					holder.gridView = (TwoWayGridView) convertView.findViewById(R.id.gridview);
+					holder.scrollView = (ScrollView) convertView.findViewById(R.id.scrollview);
+					holder.iv_line = (ImageView) convertView.findViewById(R.id.line);
 					convertView.setTag(R.layout.item_normal_docotor, holder);
 				} else {
-					holder = (DocotorViewHolder) convertView
-							.getTag(R.layout.item_normal_docotor);
+					holder = (DocotorViewHolder) convertView.getTag(R.layout.item_normal_docotor);
 				}
 
 				if ((position + 1) % PAGE_SIZE == 0) {
@@ -540,50 +574,38 @@ public class MainActivity extends BaseActivity implements
 				} else {
 					holder.iv_line.setVisibility(View.VISIBLE);
 				}
-				holder.tv_name.setText(docotorBean.getEmployeeName());
+				holder.tv_name.setText(doctorBean.getEmployeeName());
 
 			} else if (getItemViewType(position) == DOCOTOR_ITEM_SINGLE) {
 
-				if (null == convertView
-						|| null == convertView
-								.getTag(R.layout.item_single_big_docotor)) {
-					convertView = inflater.inflate(
-							R.layout.item_single_big_docotor, null);
+				if (null == convertView || null == convertView.getTag(R.layout.item_single_big_docotor)) {
+					convertView = inflater.inflate(R.layout.item_single_big_docotor, null);
 					singleHolder = new DocotorSingleViewHolder();
-					singleHolder.iv_avatar = (ImageView) convertView
-							.findViewById(R.id.iv_avatar);
-					singleHolder.tv_name = (TextView) convertView
-							.findViewById(R.id.name_txt);
-					singleHolder.tv_opNO = (FlickerTextView) convertView
-							.findViewById(R.id.current_num);
-					singleHolder.gridView = (TwoWayGridView) convertView
-							.findViewById(R.id.gridview);
-					convertView.setTag(R.layout.item_single_big_docotor,
-							singleHolder);
+					singleHolder.iv_avatar = (ImageView) convertView.findViewById(R.id.iv_avatar);
+					singleHolder.tv_name = (TextView) convertView.findViewById(R.id.name_txt);
+					singleHolder.tv_opNO = (FlickerTextView) convertView.findViewById(R.id.current_num);
+					singleHolder.gridView = (TwoWayGridView) convertView.findViewById(R.id.gridview);
+					convertView.setTag(R.layout.item_single_big_docotor, singleHolder);
 				} else {
-					singleHolder = (DocotorSingleViewHolder) convertView
-							.getTag(R.layout.item_single_big_docotor);
+					singleHolder = (DocotorSingleViewHolder) convertView.getTag(R.layout.item_single_big_docotor);
 				}
 
-				singleHolder.tv_name.setText(docotorBean.getEmployeeName());
+				singleHolder.tv_name.setText(doctorBean.getEmployeeName());
 			}
 
 			ArrayList<Appointment> appointmentArray = allDoctorAppointmentArray
-					.get(String.valueOf(docotorBean.getDoctorID()));
+					.get(String.valueOf(doctorBean.getDoctorID()));
 
 			if (appointmentArray != null && appointmentArray.size() > 0) {
 				if (getItemViewType(position) == DOCOTOR_ITEM) {
-					holder.tv_opNO.setText(String.valueOf(appointmentArray.get(
-							0).getOPNo()));
-					holder.gridView.setAdapter(new NumAdapter(appointmentArray,
-							getItemViewType(position) == DOCOTOR_ITEM_SINGLE));
+					holder.tv_opNO.setText(String.valueOf(appointmentArray.get(0).getOPNo()));
+					holder.gridView.setAdapter(
+							new NumAdapter(appointmentArray, getItemViewType(position) == DOCOTOR_ITEM_SINGLE));
 					holder.gridView.post(new MyRunnable(holder.scrollView));
 				} else {
-					singleHolder.tv_opNO.setText(String
-							.valueOf(appointmentArray.get(0).getOPNo()));
-					singleHolder.gridView.setAdapter(new NumAdapter(
-							appointmentArray,
-							getItemViewType(position) == DOCOTOR_ITEM_SINGLE));
+					singleHolder.tv_opNO.setText(String.valueOf(appointmentArray.get(0).getOPNo()));
+					singleHolder.gridView.setAdapter(
+							new NumAdapter(appointmentArray, getItemViewType(position) == DOCOTOR_ITEM_SINGLE));
 				}
 			}
 
@@ -599,20 +621,17 @@ public class MainActivity extends BaseActivity implements
 			// "soap://" + String.valueOf(docotorBean.getPhotoID()),
 			// iv_avatar);
 
-			long clinicID = docotorBean.getClinicID();
-			long photoID = docotorBean.getPhotoID();
+			long clinicID = doctorBean.getClinicID();
+			long photoID = doctorBean.getPhotoID();
 
-			long photoSID = docotorBean.getPhotoSID();
+			long photoSID = doctorBean.getPhotoSID();
 
 			if (clinicID != 0 && photoID != 0) {
-				DisplayImageOptions option = new DisplayImageOptions.Builder()
-						.delayBeforeLoading(150)
-						.bitmapConfig(Bitmap.Config.RGB_565)
-						.cacheInMemory(true).cacheOnDisk(true)
+				DisplayImageOptions option = new DisplayImageOptions.Builder().delayBeforeLoading(150)
+						.bitmapConfig(Bitmap.Config.RGB_565).cacheInMemory(true).cacheOnDisk(true)
 						.considerExifParams(true).build();
 
-				ImageLoader.getInstance().loadImage(
-						"image://" + clinicID + "." + photoSID, option,
+				ImageLoader.getInstance().loadImage(doctorBean.getPhotoURL(), option,
 						new AnimateFirstDisplayListener(iv_avatar));
 			}
 
@@ -649,11 +668,9 @@ public class MainActivity extends BaseActivity implements
 
 	}
 
-	private static class AnimateFirstDisplayListener extends
-			SimpleImageLoadingListener {
+	private static class AnimateFirstDisplayListener extends SimpleImageLoadingListener {
 
-		static final List<String> displayedImages = Collections
-				.synchronizedList(new LinkedList<String>());
+		static final List<String> displayedImages = Collections.synchronizedList(new LinkedList<String>());
 
 		ImageView mView;
 
@@ -662,8 +679,7 @@ public class MainActivity extends BaseActivity implements
 		}
 
 		@Override
-		public void onLoadingComplete(String imageUri, View view,
-				Bitmap loadedImage) {
+		public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 			Log.i("HQL", "down: " + imageUri + " ViewTag:" + mView.getTag());
 			if (loadedImage != null) {
 				mView.setImageBitmap(loadedImage);
@@ -715,41 +731,31 @@ public class MainActivity extends BaseActivity implements
 		public View getView(int position, View convertView, ViewGroup parent) {
 			NumViewHolder holder = null;
 			if (isSingle) {
-				if (null == convertView
-						|| convertView.getTag(R.layout.item_num_single) == null) {
-					convertView = inflater.inflate(R.layout.item_num_single,
-							null);
+				if (null == convertView || convertView.getTag(R.layout.item_num_single) == null) {
+					convertView = inflater.inflate(R.layout.item_num_single, null);
 					holder = new NumViewHolder();
-					holder.numTxt = (TextView) convertView
-							.findViewById(R.id.textview);
+					holder.numTxt = (TextView) convertView.findViewById(R.id.textview);
 					convertView.setTag(R.layout.item_num_single, holder);
 				} else {
-					holder = (NumViewHolder) convertView
-							.getTag(R.layout.item_num_single);
+					holder = (NumViewHolder) convertView.getTag(R.layout.item_num_single);
 				}
 			} else {
-				if (null == convertView
-						|| convertView.getTag(R.layout.item_num) == null) {
+				if (null == convertView || convertView.getTag(R.layout.item_num) == null) {
 					convertView = inflater.inflate(R.layout.item_num, null);
 					holder = new NumViewHolder();
-					holder.numTxt = (TextView) convertView
-							.findViewById(R.id.textview);
+					holder.numTxt = (TextView) convertView.findViewById(R.id.textview);
 					convertView.setTag(R.layout.item_num, holder);
 				} else {
-					holder = (NumViewHolder) convertView
-							.getTag(R.layout.item_num);
+					holder = (NumViewHolder) convertView.getTag(R.layout.item_num);
 				}
 			}
 			if (position == 0) {
-				holder.numTxt.setTextColor(getResources().getColor(
-						R.color.font_dark));
+				holder.numTxt.setTextColor(getResources().getColor(R.color.font_dark));
 			} else {
-				holder.numTxt.setTextColor(getResources()
-						.getColor(R.color.font));
+				holder.numTxt.setTextColor(getResources().getColor(R.color.font));
 			}
 			if (position < countLimit) {
-				holder.numTxt.setText(String.valueOf(list.get(position)
-						.getOPNo()));
+				holder.numTxt.setText(String.valueOf(list.get(position).getOPNo()));
 			} else {
 				holder.numTxt.setText("......");
 			}
@@ -782,26 +788,28 @@ public class MainActivity extends BaseActivity implements
 		Integer viewPagerIndex = doctorsIndex.get(String.valueOf(doctorID));
 
 		if (viewPagerIndex != null) {
-			((FlickerTextView) registeredViews.get(viewPagerIndex)
-					.findViewById(R.id.current_num)).startFlicker(String
-					.valueOf(opNO));
+			((FlickerTextView) registeredViews.get(viewPagerIndex).findViewById(R.id.current_num))
+					.startFlicker(String.valueOf(opNO));
 
 			ArrayList<Appointment> appointments = new ArrayList<Appointment>();
-			appointments.addAll(allDoctorAppointmentArray.get(String
-					.valueOf(doctorID)));
 
-			for (int i = 0; i < appointments.size(); i++) {
-				Appointment item = appointments.get(i);
-				if (item.getOPNo() == opNO) {
-					appointments.remove(i);
-					break;
+			ArrayList<Appointment> list = allDoctorAppointmentArray.get(String.valueOf(doctorID));
+
+			if (list != null) {
+				appointments.addAll(list);
+
+				for (int i = 0; i < appointments.size(); i++) {
+					Appointment item = appointments.get(i);
+					if (item.getOPNo() == opNO) {
+						appointments.remove(i);
+						break;
+					}
 				}
+				((TwoWayGridView) registeredViews.get(viewPagerIndex).findViewById(R.id.gridview))
+						.setAdapter(new NumAdapter(appointments,
+								doctorAdapter.getItemViewType(viewPagerIndex) == DoctorAdapter.DOCOTOR_ITEM_SINGLE));
 			}
-			((TwoWayGridView) registeredViews.get(viewPagerIndex).findViewById(
-					R.id.gridview))
-					.setAdapter(new NumAdapter(
-							appointments,
-							doctorAdapter.getItemViewType(viewPagerIndex) == DoctorAdapter.DOCOTOR_ITEM_SINGLE));
+
 		}
 	}
 
@@ -809,17 +817,16 @@ public class MainActivity extends BaseActivity implements
 		Integer viewPagerIndex = doctorsIndex.get(String.valueOf(doctorID));
 
 		if (viewPagerIndex != null) {
-			((FlickerTextView) registeredViews.get(viewPagerIndex)
-					.findViewById(R.id.current_num)).stopFlicker();
+			((FlickerTextView) registeredViews.get(viewPagerIndex).findViewById(R.id.current_num)).stopFlicker();
 		}
 	}
 
-	private boolean isOpNoTextViewVisible(int doctorID, int opNO) {
+	private boolean isOpNoTextViewVisible(int doctorID) {
 		Integer viewPagerIndex = doctorsIndex.get(String.valueOf(doctorID));
 
 		if (viewPagerIndex != null) {
-			return ((FlickerTextView) registeredViews.get(viewPagerIndex)
-					.findViewById(R.id.current_num)).getVisibility() == View.VISIBLE;
+			return ((FlickerTextView) registeredViews.get(viewPagerIndex).findViewById(R.id.current_num))
+					.getVisibility() == View.VISIBLE;
 		}
 		return false;
 	}
@@ -828,11 +835,9 @@ public class MainActivity extends BaseActivity implements
 		Integer viewPagerIndex = doctorsIndex.get(String.valueOf(doctorID));
 
 		if (viewPagerIndex != null) {
-			
-			L.e(MainActivity.this, "不错哦");
-			
-			FlickerTextView textView = ((FlickerTextView) registeredViews.get(
-					viewPagerIndex).findViewById(R.id.current_num));
+
+			FlickerTextView textView = ((FlickerTextView) registeredViews.get(viewPagerIndex)
+					.findViewById(R.id.current_num));
 
 			textView.setVisibility(View.VISIBLE);
 			textView.setText(String.valueOf(opNO));
@@ -840,21 +845,20 @@ public class MainActivity extends BaseActivity implements
 
 			// 开始或者结束后,在本地删掉该预约
 
-			ArrayList<Appointment> appointments = allDoctorAppointmentArray
-					.get(String.valueOf(doctorID));
+			ArrayList<Appointment> appointments = allDoctorAppointmentArray.get(String.valueOf(doctorID));
 
-			for (int i = 0; i < appointments.size(); i++) {
-				Appointment item = appointments.get(i);
-				if (item.getOPNo() == opNO) {
-					appointments.remove(i);
-					break;
+			if (appointments != null) {
+				for (int i = 0; i < appointments.size(); i++) {
+					Appointment item = appointments.get(i);
+					if (item.getOPNo() == opNO) {
+						appointments.remove(i);
+						break;
+					}
 				}
+				((TwoWayGridView) registeredViews.get(viewPagerIndex).findViewById(R.id.gridview))
+						.setAdapter(new NumAdapter(appointments,
+								doctorAdapter.getItemViewType(viewPagerIndex) == DoctorAdapter.DOCOTOR_ITEM_SINGLE));
 			}
-			((TwoWayGridView) registeredViews.get(viewPagerIndex).findViewById(
-					R.id.gridview))
-					.setAdapter(new NumAdapter(
-							appointments,
-							doctorAdapter.getItemViewType(viewPagerIndex) == DoctorAdapter.DOCOTOR_ITEM_SINGLE));
 		}
 	}
 
@@ -862,27 +866,25 @@ public class MainActivity extends BaseActivity implements
 		Integer viewPagerIndex = doctorsIndex.get(String.valueOf(doctorID));
 
 		if (viewPagerIndex != null) {
-			L.e(MainActivity.this, "bbbbb222");
-			((FlickerTextView) registeredViews.get(viewPagerIndex)
-					.findViewById(R.id.current_num))
+			((FlickerTextView) registeredViews.get(viewPagerIndex).findViewById(R.id.current_num))
 					.setVisibility(View.INVISIBLE);
 
 			// 开始或者结束后,在本地删掉该预约
-			ArrayList<Appointment> appointments = allDoctorAppointmentArray
-					.get(String.valueOf(doctorID));
+			ArrayList<Appointment> appointments = allDoctorAppointmentArray.get(String.valueOf(doctorID));
 
-			for (int i = 0; i < appointments.size(); i++) {
-				Appointment item = appointments.get(i);
-				if (item.getOPNo() == opNO) {
-					appointments.remove(i);
-					break;
+			if (appointments != null) {
+				for (int i = 0; i < appointments.size(); i++) {
+					Appointment item = appointments.get(i);
+					if (item.getOPNo() == opNO) {
+						appointments.remove(i);
+						break;
+					}
 				}
+				((TwoWayGridView) registeredViews.get(viewPagerIndex).findViewById(R.id.gridview))
+						.setAdapter(new NumAdapter(appointments,
+								doctorAdapter.getItemViewType(viewPagerIndex) == DoctorAdapter.DOCOTOR_ITEM_SINGLE));
 			}
-			((TwoWayGridView) registeredViews.get(viewPagerIndex).findViewById(
-					R.id.gridview))
-					.setAdapter(new NumAdapter(
-							appointments,
-							doctorAdapter.getItemViewType(viewPagerIndex) == DoctorAdapter.DOCOTOR_ITEM_SINGLE));
+
 		}
 	}
 
@@ -920,9 +922,9 @@ public class MainActivity extends BaseActivity implements
 		if (timer != null) {
 			timer.cancel();
 		}
-		
+
 		timer = new Timer();
-		
+
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
@@ -934,7 +936,7 @@ public class MainActivity extends BaseActivity implements
 				handler.obtainMessage(CHANGE_PAGE).sendToTarget();
 			}
 		};
-		
+
 		timer.schedule(task, 10000, 10000);
 	}
 
@@ -970,8 +972,7 @@ public class MainActivity extends BaseActivity implements
 			if (doctorName.endsWith("医生")) {
 				speechSynthesizer.speak("请" + opNO + "号到" + doctorName + "处就诊");
 			} else {
-				speechSynthesizer.speak("请" + opNO + "号到" + doctorName
-						+ "医生处就诊");
+				speechSynthesizer.speak("请" + opNO + "号到" + doctorName + "医生处就诊");
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -1041,14 +1042,16 @@ public class MainActivity extends BaseActivity implements
 
 	@Override
 	public void onError(SpeechSynthesizer arg0, SpeechError arg1) {
+		L.e(this, "onError(SpeechSynthesizer arg0, SpeechError arg1)");
 		speechQueue.clear();
 		currentSpeechCount = 0;
 		currentSpeechMessage = null;
+		
+		initBaiduTTS();
 	}
 
 	@Override
-	public void onNewDataArrive(SpeechSynthesizer arg0, byte[] arg1,
-			boolean arg2) {
+	public void onNewDataArrive(SpeechSynthesizer arg0, byte[] arg1, boolean arg2) {
 
 	}
 
@@ -1119,5 +1122,5 @@ public class MainActivity extends BaseActivity implements
 	public void onSynthesizeFinish(SpeechSynthesizer arg0) {
 		L.e(MainActivity.this, "合成已完成");
 	};
-
+	
 }

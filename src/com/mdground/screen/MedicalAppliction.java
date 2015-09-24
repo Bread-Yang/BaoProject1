@@ -4,9 +4,6 @@ import org.mdground.api.MdgAppliction;
 import org.mdground.api.base.PlatformType;
 import org.mdground.api.bean.Employee;
 
-import android.content.Context;
-import android.content.Intent;
-
 import com.mdground.screen.constant.MemberConstant;
 import com.mdground.screen.utils.L;
 import com.mdground.screen.utils.MedicalImageDownload;
@@ -18,6 +15,9 @@ import com.tencent.android.tpush.XGPushConfig;
 import com.tencent.android.tpush.XGPushManager;
 import com.tencent.android.tpush.service.XGPushService;
 
+import android.content.Context;
+import android.content.Intent;
+
 public class MedicalAppliction extends MdgAppliction {
 
 	public static Employee employee;// 登陆用户
@@ -27,7 +27,7 @@ public class MedicalAppliction extends MdgAppliction {
 		super.onCreate();
 
 		// 开启logcat输出，方便debug，发布时请关闭
-		XGPushConfig.enableDebug(this, false);
+		XGPushConfig.enableDebug(this, true);
 		// 如果需要知道注册是否成功，请使用registerPush(getApplicationContext(),
 		// XGIOperateCallback)带callback版本
 		// 如果需要绑定账号，请使用registerPush(getApplicationContext(),account)版本
@@ -59,9 +59,8 @@ public class MedicalAppliction extends MdgAppliction {
 		// 设置标签：setTag(context, tagName)
 		// 删除标签：deleteTag(context, tagName)
 
-		ImageLoaderConfiguration configuration = new ImageLoaderConfiguration.Builder(
-				getApplicationContext()).imageDownloader(
-				new MedicalImageDownload(getApplicationContext())).build();
+		ImageLoaderConfiguration configuration = new ImageLoaderConfiguration.Builder(getApplicationContext())
+				.imageDownloader(new MedicalImageDownload(getApplicationContext())).build();
 		ImageLoader.getInstance().init(configuration);
 	}
 
@@ -83,7 +82,7 @@ public class MedicalAppliction extends MdgAppliction {
 
 	@Override
 	public int getPlatform() {
-		return PlatformType.AndroidScreen.platform(); 
+		return PlatformType.AndroidScreen.platform();
 	}
 
 }
