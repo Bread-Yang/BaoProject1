@@ -28,6 +28,7 @@ import com.mdground.screen.view.ResizeLayout;
 import com.mdground.screen.view.ResizeLayout.OnResizeListener;
 import com.mdground.screen.view.dialog.LoadingDialog;
 import com.tencent.android.tpush.XGPushConfig;
+import com.tencent.android.tpush.XGPushManager;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -45,8 +46,6 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.Toast;
-import net.hockeyapp.android.CrashManager;
-import net.hockeyapp.android.CrashManagerListener;
 
 public class LoginActivity extends Activity implements OnClickListener, OnResizeListener {
 
@@ -69,6 +68,13 @@ public class LoginActivity extends Activity implements OnClickListener, OnResize
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		L.e(this, "LoginActivity");
+		
+		String token = XGPushConfig.getToken(getApplicationContext());
+		L.e(LoginActivity.this, "token是 : " + token);
+		
+		XGPushManager.registerPush(getApplicationContext());
 
 		setContentView(R.layout.activity_login);
 		findViewById();
@@ -178,6 +184,11 @@ public class LoginActivity extends Activity implements OnClickListener, OnResize
 		Device device = DeviceUtils.getDeviceInfo(getApplicationContext());
 		device.setPlatform(PlatformType.AndroidScreen.platform()); // 设死成3
 		device.setDeviceID(new DeviceIDUtil().getDeviceID());
+		
+		String token = XGPushConfig.getToken(getApplicationContext());
+		L.e(LoginActivity.this, "token是 : " + token);
+		
+		device.setDeviceToken(token);
 
 		new LoginEmployee(this).loginEmployee(userName, password, device, new RequestCallBack() {
 
@@ -191,7 +202,7 @@ public class LoginActivity extends Activity implements OnClickListener, OnResize
 				L.e(LoginActivity.this, "登录返回的信息是 : " + response.getContent());
 
 				Employee employee = response.getContent(Employee.class);
-
+ 
 				if (response.Code != 0) {
 					Toast.makeText(getApplicationContext(), "账号异常,请联系客服", Toast.LENGTH_LONG).show();
 					return;
@@ -210,9 +221,6 @@ public class LoginActivity extends Activity implements OnClickListener, OnResize
 				PreferenceUtils.setPrefInt(getApplicationContext(), MemberConstant.DEVICE_ID, employee.getDeviceID());
 				new DeviceIDUtil().saveDeviceIDToSDCard(employee.getDeviceID());
 
-				String token = XGPushConfig.getToken(getApplicationContext());
-				L.e(LoginActivity.this, "token是 : " + token);
-
 				int EmployeeRole = ((MedicalAppliction) LoginActivity.this.getApplication()).getLoginEmployee()
 						.getEmployeeRole() & 8;
 
@@ -220,31 +228,31 @@ public class LoginActivity extends Activity implements OnClickListener, OnResize
 						.getLoginEmployee().getEmployeeRole());
 
 				if (EmployeeRole != 0) {
-					new UpdateDeviceToken(getApplicationContext()).updateDeviceToken(token, new RequestCallBack() {
-
-						@Override
-						public void onSuccess(ResponseData response) {
+//					new UpdateDeviceToken(getApplicationContext()).updateDeviceToken(token, new RequestCallBack() {
+//
+//						@Override
+//						public void onSuccess(ResponseData response) {
 //							L.e(LoginActivity.this, "code : " + response.Code);
 //							L.e(LoginActivity.this, "message : " + response.Message);
 //							L.e(LoginActivity.this, "上传token成功");
-						}
-
-						@Override
-						public void onStart() {
-
-						}
-
-						@Override
-						public void onFinish() {
-
-						}
-
-						@Override
-						public void onFailure(int statusCode, Header[] headers, String responseString,
-								Throwable throwable) {
-
-						}
-					});
+//						}
+//
+//						@Override
+//						public void onStart() {
+//
+//						}
+//
+//						@Override
+//						public void onFinish() {
+//
+//						}
+//
+//						@Override
+//						public void onFailure(int statusCode, Header[] headers, String responseString,
+//								Throwable throwable) {
+//
+//						}
+//					});
 
 					Intent intent = new Intent(LoginActivity.this, MainActivity.class);
 					startActivity(intent);

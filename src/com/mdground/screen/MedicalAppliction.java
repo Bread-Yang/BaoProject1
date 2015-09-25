@@ -27,25 +27,27 @@ public class MedicalAppliction extends MdgAppliction {
 		super.onCreate();
 
 		// 开启logcat输出，方便debug，发布时请关闭
-		XGPushConfig.enableDebug(this, true);
+		XGPushConfig.enableDebug(this, false);
 		// 如果需要知道注册是否成功，请使用registerPush(getApplicationContext(),
 		// XGIOperateCallback)带callback版本
 		// 如果需要绑定账号，请使用registerPush(getApplicationContext(),account)版本
 		// 具体可参考详细的开发指南
 		// 传递的参数为ApplicationContext
 		Context context = getApplicationContext();
-		XGPushManager.registerPush(context, new XGIOperateCallback() {
-
-			@Override
-			public void onSuccess(Object arg0, int arg1) {
-
-			}
-
-			@Override
-			public void onFail(Object arg0, int arg1, String arg2) {
-				L.e(MedicalAppliction.this, "注册失败");
-			}
-		});
+//		XGPushManager.registerPush(context, new XGIOperateCallback() {
+//
+//			@Override
+//			public void onSuccess(Object arg0, int arg1) {
+//				L.e(MedicalAppliction.this, "信鸽注册成功");
+//			}
+//
+//			@Override
+//			public void onFail(Object arg0, int arg1, String arg2) {
+//				L.e(MedicalAppliction.this, "信鸽注册失败");
+//			}
+//		});
+		L.e(this, "MedicalAppliction");
+		XGPushManager.registerPush(getApplicationContext());
 
 		// 2.36（不包括）之前的版本需要调用以下2行代码
 		Intent service = new Intent(context, XGPushService.class);

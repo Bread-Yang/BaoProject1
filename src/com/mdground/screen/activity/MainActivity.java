@@ -42,6 +42,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.tencent.android.tpush.XGPushManager;
 
 import android.R.integer;
 import android.annotation.SuppressLint;
@@ -67,8 +68,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import net.hockeyapp.android.CrashManager;
-import net.hockeyapp.android.CrashManagerListener;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class MainActivity extends BaseActivity implements SpeechSynthesizerListener {
@@ -239,6 +238,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 	@Override
 	protected void onCreate(Bundle arg0) {
 		super.onCreate(arg0);
+		XGPushManager.registerPush(getApplicationContext());
 		setContentView(R.layout.activity_main);
 		findViewById();
 		setListeners();
@@ -265,39 +265,39 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 
 	@Override
 	protected void onResume() {
-		super.onResume();
+		super.onResume(); 
 
-		CrashManager.register(this, "503880ea15f946c5a47042feda3e6517", new MyCrashManagerListener());
+//		CrashManager.register(this, "503880ea15f946c5a47042feda3e6517", new MyCrashManagerListener());
 	}
 
-	private static class MyCrashManagerListener extends CrashManagerListener {
-
-		public boolean shouldAutoUploadCrashes() {
-			return true;
-		}
-
-		public String getDescription() {
-			String description = "";
-
-			try {
-				Process process = Runtime.getRuntime().exec("logcat -d *:E");
-				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-				StringBuilder log = new StringBuilder();
-				String line;
-				while ((line = bufferedReader.readLine()) != null) {
-					log.append(line);
-					log.append(System.getProperty("line.separator"));
-				}
-				bufferedReader.close();
-
-				description = log.toString();
-			} catch (IOException e) {
-			}
-
-			return description;
-		}
-	}
+//	private static class MyCrashManagerListener extends CrashManagerListener {
+//
+//		public boolean shouldAutoUploadCrashes() {
+//			return true;
+//		}
+//
+//		public String getDescription() {
+//			String description = "";
+//
+//			try {
+//				Process process = Runtime.getRuntime().exec("logcat -d *:E");
+//				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//
+//				StringBuilder log = new StringBuilder();
+//				String line;
+//				while ((line = bufferedReader.readLine()) != null) {
+//					log.append(line);
+//					log.append(System.getProperty("line.separator"));
+//				}
+//				bufferedReader.close();
+//
+//				description = log.toString();
+//			} catch (IOException e) {
+//			}
+//
+//			return description;
+//		}
+//	}
 
 	private void findViewById() {
 		viewPager = (GridViewPager) findViewById(R.id.gvp);
