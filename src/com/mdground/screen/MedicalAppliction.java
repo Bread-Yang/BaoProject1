@@ -4,13 +4,13 @@ import org.mdground.api.MdgAppliction;
 import org.mdground.api.base.PlatformType;
 import org.mdground.api.bean.Employee;
 
+import com.iflytek.cloud.SpeechUtility;
 import com.mdground.screen.constant.MemberConstant;
 import com.mdground.screen.utils.L;
 import com.mdground.screen.utils.MedicalImageDownload;
 import com.mdground.screen.utils.PreferenceUtils;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.tencent.android.tpush.XGIOperateCallback;
 import com.tencent.android.tpush.XGPushConfig;
 import com.tencent.android.tpush.XGPushManager;
 import com.tencent.android.tpush.service.XGPushService;
@@ -34,18 +34,18 @@ public class MedicalAppliction extends MdgAppliction {
 		// 具体可参考详细的开发指南
 		// 传递的参数为ApplicationContext
 		Context context = getApplicationContext();
-//		XGPushManager.registerPush(context, new XGIOperateCallback() {
-//
-//			@Override
-//			public void onSuccess(Object arg0, int arg1) {
-//				L.e(MedicalAppliction.this, "信鸽注册成功");
-//			}
-//
-//			@Override
-//			public void onFail(Object arg0, int arg1, String arg2) {
-//				L.e(MedicalAppliction.this, "信鸽注册失败");
-//			}
-//		});
+		// XGPushManager.registerPush(context, new XGIOperateCallback() {
+		//
+		// @Override
+		// public void onSuccess(Object arg0, int arg1) {
+		// L.e(MedicalAppliction.this, "信鸽注册成功");
+		// }
+		//
+		// @Override
+		// public void onFail(Object arg0, int arg1, String arg2) {
+		// L.e(MedicalAppliction.this, "信鸽注册失败");
+		// }
+		// });
 		L.e(this, "MedicalAppliction");
 		XGPushManager.registerPush(getApplicationContext());
 

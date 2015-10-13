@@ -25,7 +25,7 @@ public class GridViewPager extends ViewPager {
 
 	private List<BGGridView> mGridViewList = null;
 
-	private static final int DEFAULT_COLUMN_NUMBER = 3;
+	private static final int DEFAULT_COLUMN_NUMBER = 2;
 	private static final int DEFAULT_ROW_NUMBER = 1;
 
 	private int mRowNumber = 0;
@@ -33,7 +33,7 @@ public class GridViewPager extends ViewPager {
 
 	private float mCellMinWidth = 0;
 	private float mCellMinHeight = 0;
-	private float mColumnMargin = 0;
+	private float mColumnMargin = 30;
 	private float mRowMargin = 0;
 
 	private BaseAdapter mAdapter;

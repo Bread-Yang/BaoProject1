@@ -331,6 +331,7 @@ containing a value of this type.
         public static final int font=0x7f080002;
         public static final int font_blue=0x7f080003;
         public static final int font_dark=0x7f080001;
+        public static final int main_background=0x7f080005;
         public static final int normal_black=0x7f080004;
     }
     public static final class dimen {
@@ -387,33 +388,45 @@ containing a value of this type.
         public static final int box_delete=0x7f02000a;
         public static final int button2_nor=0x7f02000b;
         public static final int button2_sel=0x7f02000c;
-        public static final int effect=0x7f02000d;
-        public static final int effect2=0x7f02000e;
-        public static final int ic_launcher=0x7f02000f;
-        public static final int id_nor=0x7f020010;
-        public static final int line=0x7f020011;
-        public static final int loading_1=0x7f020012;
-        public static final int loading_10=0x7f020013;
-        public static final int loading_2=0x7f020014;
-        public static final int loading_3=0x7f020015;
-        public static final int loading_4=0x7f020016;
-        public static final int loading_5=0x7f020017;
-        public static final int loading_6=0x7f020018;
-        public static final int loading_7=0x7f020019;
-        public static final int loading_8=0x7f02001a;
-        public static final int loading_9=0x7f02001b;
-        public static final int loading_bg=0x7f02001c;
-        public static final int lock_nor=0x7f02001d;
-        public static final int login_bg=0x7f02001e;
-        public static final int login_button_selector=0x7f02001f;
-        public static final int login_line=0x7f020020;
-        public static final int page=0x7f020021;
-        public static final int photo=0x7f020022;
-        public static final int photo2=0x7f020023;
+        public static final int doctor_name_bg=0x7f02000d;
+        public static final int effect=0x7f02000e;
+        public static final int effect2=0x7f02000f;
+        public static final int ic_launcher=0x7f020010;
+        public static final int icon_clip=0x7f020011;
+        public static final int icon_yizhida=0x7f020012;
+        public static final int id_nor=0x7f020013;
+        public static final int line=0x7f020014;
+        public static final int loading_1=0x7f020015;
+        public static final int loading_10=0x7f020016;
+        public static final int loading_2=0x7f020017;
+        public static final int loading_3=0x7f020018;
+        public static final int loading_4=0x7f020019;
+        public static final int loading_5=0x7f02001a;
+        public static final int loading_6=0x7f02001b;
+        public static final int loading_7=0x7f02001c;
+        public static final int loading_8=0x7f02001d;
+        public static final int loading_9=0x7f02001e;
+        public static final int loading_bg=0x7f02001f;
+        public static final int lock_nor=0x7f020020;
+        public static final int login_bg=0x7f020021;
+        public static final int login_button_selector=0x7f020022;
+        public static final int login_line=0x7f020023;
+        public static final int page=0x7f020024;
+        public static final int photo=0x7f020025;
+        public static final int photo2=0x7f020026;
+        public static final int point_normal=0x7f020027;
+        public static final int point_select=0x7f020028;
+        public static final int selector_page_indicator=0x7f020029;
+        public static final int shape_data_center_circle_highlight=0x7f02002a;
+        public static final int shape_data_center_circle_normal=0x7f02002b;
+        public static final int shape_item_doctor=0x7f02002c;
+        public static final int tab_1=0x7f02002d;
+        public static final int tab_2=0x7f02002e;
+        public static final int tab_selector=0x7f02002f;
     }
     public static final class id {
-        public static final int LoginID=0x7f0a0024;
-        public static final int action_settings=0x7f0a002d;
+        public static final int LoginID=0x7f0a0027;
+        public static final int action_settings=0x7f0a0034;
         public static final int alwaysScroll=0x7f0a000c;
         public static final int auto_fit=0x7f0a0015;
         public static final int bottom=0x7f0a0000;
@@ -424,51 +437,59 @@ containing a value of this type.
         public static final int clip_horizontal=0x7f0a0004;
         public static final int clip_vertical=0x7f0a0005;
         public static final int columnWidth=0x7f0a0011;
-        public static final int current_num=0x7f0a0029;
         public static final int disabled=0x7f0a000d;
         public static final int et_account=0x7f0a0019;
         public static final int et_password=0x7f0a001c;
         public static final int fill=0x7f0a0006;
         public static final int fill_horizontal=0x7f0a0007;
         public static final int fill_vertical=0x7f0a0008;
-        public static final int gridview=0x7f0a002a;
+        public static final int gridview=0x7f0a002d;
+        public static final int guide_indicator=0x7f0a0023;
         public static final int gvp=0x7f0a001f;
         public static final int horizontal=0x7f0a000f;
         public static final int iv_account=0x7f0a0018;
-        public static final int iv_avatar=0x7f0a0027;
+        public static final int iv_avatar=0x7f0a002a;
         public static final int iv_clear_account=0x7f0a001a;
         public static final int iv_clear_password=0x7f0a001d;
+        public static final int iv_clip=0x7f0a002e;
+        public static final int iv_line=0x7f0a0028;
         public static final int iv_password=0x7f0a001b;
+        public static final int iv_yizhida=0x7f0a0031;
         public static final int left=0x7f0a0009;
-        public static final int line=0x7f0a0025;
-        public static final int loading_gif=0x7f0a0023;
+        public static final int loading_gif=0x7f0a0026;
         public static final int login_root_layout=0x7f0a0016;
-        public static final int name_txt=0x7f0a0028;
+        public static final int name_txt=0x7f0a002c;
         public static final int none=0x7f0a0012;
         public static final int normal=0x7f0a000e;
         public static final int page=0x7f0a0021;
         public static final int page_view=0x7f0a0020;
+        public static final int rg_page=0x7f0a0024;
         public static final int right=0x7f0a000a;
         public static final int scrollView=0x7f0a0017;
-        public static final int scrollview=0x7f0a0026;
+        public static final int scrollview=0x7f0a0029;
         public static final int spacingWidth=0x7f0a0013;
         public static final int spacingWidthUniform=0x7f0a0014;
-        public static final int textview=0x7f0a002b;
         public static final int top=0x7f0a000b;
-        public static final int update_progress=0x7f0a002c;
+        public static final int tv_current=0x7f0a0032;
+        public static final int tv_highlight_num=0x7f0a0022;
+        public static final int tv_num=0x7f0a0030;
+        public static final int tv_opNO=0x7f0a002b;
+        public static final int update_progress=0x7f0a0033;
         public static final int vertical=0x7f0a0010;
-        public static final int viewpager=0x7f0a0022;
+        public static final int view_seperator=0x7f0a002f;
+        public static final int viewpager=0x7f0a0025;
     }
     public static final class layout {
         public static final int activity_login=0x7f030000;
         public static final int activity_main=0x7f030001;
         public static final int activity_test=0x7f030002;
         public static final int dialog_loading=0x7f030003;
-        public static final int item_normal_docotor=0x7f030004;
-        public static final int item_num=0x7f030005;
-        public static final int item_num_single=0x7f030006;
+        public static final int indicator_view=0x7f030004;
+        public static final int item_normal_docotor=0x7f030005;
+        public static final int item_num=0x7f030006;
         public static final int item_single_big_docotor=0x7f030007;
         public static final int progress_softupdate=0x7f030008;
+        public static final int tab_guide=0x7f030009;
     }
     public static final class menu {
         public static final int main=0x7f090000;
@@ -555,6 +576,25 @@ containing a value of this type.
         public static final int loadingDialog=0x7f070013;
     }
     public static final class styleable {
+        /** Attributes that can be used with a CompoundButton.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #CompoundButton_android_button android:button}</code></td><td></td></tr>
+           </table>
+           @see #CompoundButton_android_button
+         */
+        public static final int[] CompoundButton = {
+            0x01010107
+        };
+        /**
+          <p>This symbol is the offset where the {@link android.R.attr#button}
+          attribute's value can be found in the {@link #CompoundButton} array.
+          @attr name android:button
+        */
+        public static final int CompoundButton_android_button = 0;
         /** Attributes that can be used with a GridViewPager.
            <p>Includes the following attributes:</p>
            <table>

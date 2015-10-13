@@ -1,8 +1,5 @@
 package com.mdground.screen.activity;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,6 +28,7 @@ import com.baidu.speechsynthesizer.publicutility.SpeechLogger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mdground.screen.R;
+import com.mdground.screen.fonts.CustomTypefaceSpan;
 import com.mdground.screen.service.DataService;
 import com.mdground.screen.utils.L;
 import com.mdground.screen.utils.UpdateManager;
@@ -44,7 +42,6 @@ import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.tencent.android.tpush.XGPushManager;
 
-import android.R.integer;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
@@ -52,6 +49,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -59,6 +57,10 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -66,18 +68,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class MainActivity extends BaseActivity implements SpeechSynthesizerListener {
 
 	private GridViewPager viewPager;
+	private RadioGroup rg_page;
 	private DoctorAdapter doctorAdapter;
-	private TextView tv_page;
+	private TextView tv_page, tv_highlight_num;
 	private int totalNum;
 	private int currentPage = 1;
-	private static final int PAGE_SIZE = 3;
+	private static final int PAGE_SIZE = 2;
 	private Timer timer;
 	private static final int CHANGE_PAGE = 0x01;
 	private View pageView;
@@ -103,6 +109,27 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 
 	private LoadingDialog mLoadIngDialog;
 
+	private Typeface ttf_NotoSans_Bold, ttf_NotoSans_Regular;
+
+	/**
+	 * 预约是来自wechat的
+	 */
+	public static final int ONLINE = 1;
+
+	public enum EXIT_CODE {
+		A(104), B(203);
+
+		private int numVal;
+
+		EXIT_CODE(int numVal) {
+			this.numVal = numVal;
+		}
+
+		public int getNumVal() {
+			return numVal;
+		}
+	}
+
 	class ClientReciver extends BroadcastReceiver {
 
 		@Override
@@ -114,7 +141,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 				// intent.getStringExtra("message"), Toast.LENGTH_SHORT)
 				// .show();
 
-//				L.e(MainActivity.this, "app发过来的socket信息是 : " + message);
+				// L.e(MainActivity.this, "app发过来的socket信息是 : " + message);
 
 				JSONObject json;
 
@@ -192,11 +219,12 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 				String title = intent.getStringExtra("title");
 				String content = intent.getStringExtra("content");
 				String customContent = intent.getStringExtra("customContent");
-//				L.e(MainActivity.this, "拿到的title : " + title);
-//				L.e(MainActivity.this, "拿到的content : " + content);
-//				L.e(MainActivity.this, "拿到的customContent : " + customContent);
+				// L.e(MainActivity.this, "拿到的title : " + title);
+				// L.e(MainActivity.this, "拿到的content : " + content);
+				// L.e(MainActivity.this, "拿到的customContent : " +
+				// customContent);
 
-//				L.e(MainActivity.this, "收到推送");
+				L.e(MainActivity.this, "收到推送");
 
 				try {
 					JSONObject json = new JSONObject(customContent);
@@ -204,21 +232,19 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 
 					// 更新列表的推送
 					if ("RefreshAppointment".equals(functionName)) {
-						// Toast.makeText(getApplicationContext(),
-						// "收到重新更新列表的推送",
-						// Toast.LENGTH_SHORT).show();
+						Toast.makeText(getApplicationContext(), "收到重新更新列表的推送", Toast.LENGTH_SHORT).show();
 
 						int doctorId = Integer.valueOf(content);
 
 						Integer index = doctorsIndex.get(String.valueOf(doctorId));
-						
+
 						if (index != null) {
 							getAppointmentListByDoctor(index, doctorId);
 						}
 
 						// for (int i = 0; i < doctorsArray.size(); i++) {
 						// ((FlickerTextView) registeredViews.get(i)
-						// .findViewById(R.id.current_num))
+						// .findViewById(R.id.tv_opNO))
 						// .setVisibility(View.INVISIBLE);
 						//
 						// getAppointmentListByDoctor(i, (int) doctorsArray
@@ -241,6 +267,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 		XGPushManager.registerPush(getApplicationContext());
 		setContentView(R.layout.activity_main);
 		findViewById();
+		init();
 		setListeners();
 		initService();
 		initBaiduTTS();
@@ -248,12 +275,12 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 
 		mLoadIngDialog = new LoadingDialog(this).initText(getResources().getString(R.string.logining));
 
-//		 new Handler().postDelayed(new Runnable() {
-//		 public void run() {
-//		 UpdateManager manager = new UpdateManager(MainActivity.this);
-//		 manager.showDownloadDialog();
-//		 }
-//		 }, 10000);
+		// new Handler().postDelayed(new Runnable() {
+		// public void run() {
+		// UpdateManager manager = new UpdateManager(MainActivity.this);
+		// manager.showDownloadDialog();
+		// }
+		// }, 10000);
 
 		// new Handler().postDelayed(new Runnable() {
 		// public void run() {
@@ -265,44 +292,74 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 
 	@Override
 	protected void onResume() {
-		super.onResume(); 
+		super.onResume();
 
-//		CrashManager.register(this, "503880ea15f946c5a47042feda3e6517", new MyCrashManagerListener());
+		// CrashManager.register(this, "503880ea15f946c5a47042feda3e6517", new
+		// MyCrashManagerListener());
 	}
 
-//	private static class MyCrashManagerListener extends CrashManagerListener {
-//
-//		public boolean shouldAutoUploadCrashes() {
-//			return true;
-//		}
-//
-//		public String getDescription() {
-//			String description = "";
-//
-//			try {
-//				Process process = Runtime.getRuntime().exec("logcat -d *:E");
-//				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//
-//				StringBuilder log = new StringBuilder();
-//				String line;
-//				while ((line = bufferedReader.readLine()) != null) {
-//					log.append(line);
-//					log.append(System.getProperty("line.separator"));
-//				}
-//				bufferedReader.close();
-//
-//				description = log.toString();
-//			} catch (IOException e) {
-//			}
-//
-//			return description;
-//		}
-//	}
+	// private static class MyCrashManagerListener extends CrashManagerListener
+	// {
+	//
+	// public boolean shouldAutoUploadCrashes() {
+	// return true;
+	// }
+	//
+	// public String getDescription() {
+	// String description = "";
+	//
+	// try {
+	// Process process = Runtime.getRuntime().exec("logcat -d *:E");
+	// BufferedReader bufferedReader = new BufferedReader(new
+	// InputStreamReader(process.getInputStream()));
+	//
+	// StringBuilder log = new StringBuilder();
+	// String line;
+	// while ((line = bufferedReader.readLine()) != null) {
+	// log.append(line);
+	// log.append(System.getProperty("line.separator"));
+	// }
+	// bufferedReader.close();
+	//
+	// description = log.toString();
+	// } catch (IOException e) {
+	// }
+	//
+	// return description;
+	// }
+	// }
 
 	private void findViewById() {
 		viewPager = (GridViewPager) findViewById(R.id.gvp);
+		rg_page = (RadioGroup) findViewById(R.id.rg_page);
 		tv_page = (TextView) findViewById(R.id.page);
+		tv_highlight_num = (TextView) findViewById(R.id.tv_highlight_num);
 		pageView = findViewById(R.id.page_view);
+
+	}
+
+	private void init() {
+		ttf_NotoSans_Bold = Typeface.createFromAsset(getAssets(), "fonts/NotoSans-Bold.ttf");
+		ttf_NotoSans_Regular = Typeface.createFromAsset(getAssets(), "fonts/NotoSans-Regular.ttf");
+	}
+
+	private void initIndicator() {
+		rg_page.removeAllViews();
+
+		LayoutInflater inflate = LayoutInflater.from(getApplicationContext());
+
+		L.e(this, "size : " + doctorsArray.size());
+
+		if (doctorsArray.size() > 2) {
+			for (int i = 0; i < doctorsArray.size() / 2 + 1; i++) { // 一页显示两个医生
+				RadioButton button = (RadioButton) inflate.inflate(R.layout.indicator_view, null);
+
+				RadioGroup.LayoutParams layoutParams = new RadioGroup.LayoutParams(40, 30);
+				// layoutParams.setMargins(10, 0, 0, 0);
+
+				rg_page.addView(button, layoutParams);
+			}
+		}
 	}
 
 	private void setListeners() {
@@ -316,6 +373,11 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 			@Override
 			public void onPageScrolled(int arg0, float arg1, int arg2) {
 				tv_page.setText((arg0 + 1) + "/" + getTotalPage(totalNum));
+
+				RadioButton button = ((RadioButton) rg_page.getChildAt(arg0));
+				if (button != null) {
+					button.setChecked(true);
+				}
 			}
 
 			@Override
@@ -416,14 +478,16 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 
 				totalNum = doctorsArray.size();
 				if (doctorsArray.size() > 1) {
-					pageView.setVisibility(View.VISIBLE);
+					// pageView.setVisibility(View.VISIBLE);
 				} else {
-					pageView.setVisibility(View.INVISIBLE);
+					// pageView.setVisibility(View.INVISIBLE);
 					viewPager.setColumnNum(1);
 				}
 				tv_page.setText("1/" + getTotalPage(totalNum));
 				doctorAdapter = new DoctorAdapter(doctorsArray);
 				viewPager.setAdapter(doctorAdapter);
+
+				initIndicator();
 
 				startPageSwitch();
 
@@ -470,7 +534,9 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 								Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 								Appointment appointment = gson.fromJson(item.toString(), Appointment.class);
 
-//								L.e(MainActivity.this, "appointment.getOPStatus() : " + appointment.getOPStatus());
+								// L.e(MainActivity.this,
+								// "appointment.getOPStatus() : " +
+								// appointment.getOPStatus());
 
 								if ((appointment.getOPStatus() & Appointment.STATUS_WATTING) != 0
 										&& (appointment.getOPStatus() & Appointment.STATUS_DIAGNOSING) == 0) {
@@ -481,6 +547,8 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 
 							TwoWayGridView gridView = ((TwoWayGridView) registeredViews.get(index)
 									.findViewById(R.id.gridview));
+							TextView textView = (TextView) registeredViews.get(index).findViewById(R.id.tv_opNO);
+							textView.setText("");
 
 							gridView.setAdapter(new NumAdapter(appointmentArray,
 									doctorAdapter.getItemViewType(index) == DoctorAdapter.DOCOTOR_ITEM_SINGLE));
@@ -508,7 +576,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 					@Override
 					public void onFailure(int statusCode, Header[] headers, String responseString,
 							Throwable throwable) {
-						
+
 						new Handler().postDelayed(new Runnable() {
 							public void run() {
 								getAppointmentListByDoctor(index, doctorId);
@@ -560,19 +628,20 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 					holder = new DocotorViewHolder();
 					holder.iv_avatar = (ImageView) convertView.findViewById(R.id.iv_avatar);
 					holder.tv_name = (TextView) convertView.findViewById(R.id.name_txt);
-					holder.tv_opNO = (FlickerTextView) convertView.findViewById(R.id.current_num);
+					holder.tv_opNO = (FlickerTextView) convertView.findViewById(R.id.tv_opNO);
+					holder.tv_opNO.setTypeface(ttf_NotoSans_Bold);
 					holder.gridView = (TwoWayGridView) convertView.findViewById(R.id.gridview);
 					holder.scrollView = (ScrollView) convertView.findViewById(R.id.scrollview);
-					holder.iv_line = (ImageView) convertView.findViewById(R.id.line);
+					holder.iv_line = (ImageView) convertView.findViewById(R.id.iv_line);
 					convertView.setTag(R.layout.item_normal_docotor, holder);
 				} else {
 					holder = (DocotorViewHolder) convertView.getTag(R.layout.item_normal_docotor);
 				}
 
 				if ((position + 1) % PAGE_SIZE == 0) {
-					holder.iv_line.setVisibility(View.INVISIBLE);
+					// holder.iv_line.setVisibility(View.INVISIBLE);
 				} else {
-					holder.iv_line.setVisibility(View.VISIBLE);
+					// holder.iv_line.setVisibility(View.VISIBLE);
 				}
 				holder.tv_name.setText(doctorBean.getEmployeeName());
 
@@ -583,7 +652,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 					singleHolder = new DocotorSingleViewHolder();
 					singleHolder.iv_avatar = (ImageView) convertView.findViewById(R.id.iv_avatar);
 					singleHolder.tv_name = (TextView) convertView.findViewById(R.id.name_txt);
-					singleHolder.tv_opNO = (FlickerTextView) convertView.findViewById(R.id.current_num);
+					singleHolder.tv_opNO = (FlickerTextView) convertView.findViewById(R.id.tv_opNO);
 					singleHolder.gridView = (TwoWayGridView) convertView.findViewById(R.id.gridview);
 					convertView.setTag(R.layout.item_single_big_docotor, singleHolder);
 				} else {
@@ -705,9 +774,9 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 			this.isSingle = isSingleItem;
 			this.inflater = LayoutInflater.from(MainActivity.this);
 			if (isSingleItem) {
-				countLimit = 11;
+				countLimit = 28;
 			} else {
-				countLimit = 8;
+				countLimit = 11;
 			}
 		}
 
@@ -730,34 +799,35 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			NumViewHolder holder = null;
-			if (isSingle) {
-				if (null == convertView || convertView.getTag(R.layout.item_num_single) == null) {
-					convertView = inflater.inflate(R.layout.item_num_single, null);
-					holder = new NumViewHolder();
-					holder.numTxt = (TextView) convertView.findViewById(R.id.textview);
-					convertView.setTag(R.layout.item_num_single, holder);
-				} else {
-					holder = (NumViewHolder) convertView.getTag(R.layout.item_num_single);
-				}
+			if (null == convertView || convertView.getTag(R.layout.item_num) == null) {
+				convertView = inflater.inflate(R.layout.item_num, null);
+				holder = new NumViewHolder();
+				holder.tv_num = (TextView) convertView.findViewById(R.id.tv_num);
+				holder.tv_num.setTypeface(ttf_NotoSans_Regular);
+				holder.iv_yizhida = (ImageView) convertView.findViewById(R.id.iv_yizhida);
+				convertView.setTag(R.layout.item_num, holder);
 			} else {
-				if (null == convertView || convertView.getTag(R.layout.item_num) == null) {
-					convertView = inflater.inflate(R.layout.item_num, null);
-					holder = new NumViewHolder();
-					holder.numTxt = (TextView) convertView.findViewById(R.id.textview);
-					convertView.setTag(R.layout.item_num, holder);
-				} else {
-					holder = (NumViewHolder) convertView.getTag(R.layout.item_num);
-				}
+				holder = (NumViewHolder) convertView.getTag(R.layout.item_num);
 			}
 			if (position == 0) {
-				holder.numTxt.setTextColor(getResources().getColor(R.color.font_dark));
+				// holder.tv_num.setTextColor(getResources().getColor(R.color.font_dark));
 			} else {
-				holder.numTxt.setTextColor(getResources().getColor(R.color.font));
+				// holder.tv_num.setTextColor(getResources().getColor(R.color.font));
+			}
+
+			Appointment appointment = list.get(position);
+
+			if (appointment.getOPType() == ONLINE) {
+				holder.iv_yizhida.setVisibility(View.VISIBLE);
+			} else {
+				holder.iv_yizhida.setVisibility(View.INVISIBLE);
 			}
 			if (position < countLimit) {
-				holder.numTxt.setText(String.valueOf(list.get(position).getOPNo()));
+				holder.tv_num.setText(String.valueOf(appointment.getOPNo()));
+				convertView.setVisibility(View.VISIBLE);
 			} else {
-				holder.numTxt.setText("......");
+				holder.tv_num.setText("......");
+				convertView.setVisibility(View.INVISIBLE);
 			}
 			// if (isSingle) {
 			// holder.numTxt.setTextSize(TypedValue.COMPLEX_UNIT_PX,
@@ -788,7 +858,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 		Integer viewPagerIndex = doctorsIndex.get(String.valueOf(doctorID));
 
 		if (viewPagerIndex != null) {
-			((FlickerTextView) registeredViews.get(viewPagerIndex).findViewById(R.id.current_num))
+			((FlickerTextView) registeredViews.get(viewPagerIndex).findViewById(R.id.tv_opNO))
 					.startFlicker(String.valueOf(opNO));
 
 			ArrayList<Appointment> appointments = new ArrayList<Appointment>();
@@ -817,7 +887,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 		Integer viewPagerIndex = doctorsIndex.get(String.valueOf(doctorID));
 
 		if (viewPagerIndex != null) {
-			((FlickerTextView) registeredViews.get(viewPagerIndex).findViewById(R.id.current_num)).stopFlicker();
+			((FlickerTextView) registeredViews.get(viewPagerIndex).findViewById(R.id.tv_opNO)).stopFlicker();
 		}
 	}
 
@@ -825,7 +895,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 		Integer viewPagerIndex = doctorsIndex.get(String.valueOf(doctorID));
 
 		if (viewPagerIndex != null) {
-			return ((FlickerTextView) registeredViews.get(viewPagerIndex).findViewById(R.id.current_num))
+			return ((FlickerTextView) registeredViews.get(viewPagerIndex).findViewById(R.id.tv_opNO))
 					.getVisibility() == View.VISIBLE;
 		}
 		return false;
@@ -837,7 +907,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 		if (viewPagerIndex != null) {
 
 			FlickerTextView textView = ((FlickerTextView) registeredViews.get(viewPagerIndex)
-					.findViewById(R.id.current_num));
+					.findViewById(R.id.tv_opNO));
 
 			textView.setVisibility(View.VISIBLE);
 			textView.setText(String.valueOf(opNO));
@@ -866,7 +936,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 		Integer viewPagerIndex = doctorsIndex.get(String.valueOf(doctorID));
 
 		if (viewPagerIndex != null) {
-			((FlickerTextView) registeredViews.get(viewPagerIndex).findViewById(R.id.current_num))
+			((FlickerTextView) registeredViews.get(viewPagerIndex).findViewById(R.id.tv_opNO))
 					.setVisibility(View.INVISIBLE);
 
 			// 开始或者结束后,在本地删掉该预约
@@ -905,7 +975,8 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 	}
 
 	static class NumViewHolder {
-		TextView numTxt;
+		TextView tv_num;
+		ImageView iv_yizhida;
 	}
 
 	final Handler handler = new Handler() {
@@ -940,12 +1011,12 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 		timer.schedule(task, 10000, 10000);
 	}
 
-	private void stopPageSwitch() {
-		if (timer != null) {
-			timer.cancel();
-			timer = null;
-		}
-	}
+	// private void stopPageSwitch() {
+	// if (timer != null) {
+	// timer.cancel();
+	// timer = null;
+	// }
+	// }
 
 	private int getTotalPage(int num) {
 		return num % PAGE_SIZE == 0 ? num / PAGE_SIZE : num / PAGE_SIZE + 1;
@@ -964,15 +1035,36 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 			startCallPatient(doctorID, opNO);
 
 			// 切换到该医生的界面
-			Integer pageIndex = doctorsIndex.get(String.valueOf(doctorID));
-			if (pageIndex != null) {
-				viewPager.setCurrentItem(pageIndex / 3, false);
-				stopPageSwitch();
-			}
-			if (doctorName.endsWith("医生")) {
-				speechSynthesizer.speak("请" + opNO + "号到" + doctorName + "处就诊");
-			} else {
-				speechSynthesizer.speak("请" + opNO + "号到" + doctorName + "医生处就诊");
+			// Integer pageIndex = doctorsIndex.get(String.valueOf(doctorID));
+			// if (pageIndex != null) {
+			// viewPager.setCurrentItem(pageIndex / 3, false);
+			// stopPageSwitch();
+			// }
+
+			String speechString = null;
+//			if (doctorName.endsWith("医生")) {
+//				speechString = "请  " + opNO + "  号到" + doctorName + "处就诊";
+//			} else {
+//				speechString = "请  " + opNO + "  号到" + doctorName + "医生处就诊";
+//			}
+			
+			speechString = "请  " + opNO + "  号到" + doctorName + "处就诊";
+			
+			// 播放语音
+			speechSynthesizer.speak(speechString);
+
+			// 显示多个医生的时候
+
+			if (doctorsArray.size() > 1) {
+				// 在顶部高亮
+				SpannableString ss = new SpannableString(speechString);
+				ss.setSpan(new CustomTypefaceSpan("", ttf_NotoSans_Bold), 3, 3 + String.valueOf(opNO).length(),
+						Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+				ss.setSpan(new RelativeSizeSpan(1.4f), 3, 3 + String.valueOf(opNO).length(),
+						Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+				tv_highlight_num.setText(ss);
+
+				tv_highlight_num.setVisibility(View.VISIBLE);
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -1023,7 +1115,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 
 	protected void onDestroy() {
 		super.onDestroy();
-		stopPageSwitch();
+		// stopPageSwitch();
 		unregisterReceiver(mClientRecive);
 		unregisterReceiver(xgReceiver);
 	}
@@ -1046,7 +1138,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 		speechQueue.clear();
 		currentSpeechCount = 0;
 		currentSpeechMessage = null;
-		
+
 		initBaiduTTS();
 	}
 
@@ -1083,7 +1175,8 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 						currentSpeechMessage = message;
 						speech(message);
 					} else {
-						startPageSwitch();
+						// startPageSwitch();
+						tv_highlight_num.setVisibility(View.INVISIBLE);
 					}
 				} else {
 					speech(currentSpeechMessage);
@@ -1122,5 +1215,5 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 	public void onSynthesizeFinish(SpeechSynthesizer arg0) {
 		L.e(MainActivity.this, "合成已完成");
 	};
-	
+
 }

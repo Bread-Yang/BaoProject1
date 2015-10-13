@@ -1,127 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal" >
+    android:layout_height="match_parent" >
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="168dp"
-        android:layout_marginTop="99dp"
-        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:background="@drawable/shape_item_doctor"
         android:orientation="vertical" >
 
         <LinearLayout
-            android:layout_width="460dp"
-            android:layout_height="375dp"
-            android:layout_marginLeft="8dp"
+            android:layout_width="fill_parent"
+            android:layout_height="300dp"
             android:orientation="horizontal" >
 
-            <ImageView
-                android:id="@+id/iv_avatar"
-                android:layout_width="fill_parent"
+            <LinearLayout
+                android:layout_width="400dp"
                 android:layout_height="fill_parent"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:scaleType="centerCrop"
-                android:src="@drawable/photo2" />
+                android:layout_marginLeft="35dp"
+                android:orientation="horizontal" >
 
-            <ImageView
-                android:layout_width="14dp"
+                <ImageView
+                    android:id="@+id/iv_avatar"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/photo2" />
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="fill_parent"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/effect" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="fill_parent"
-                android:scaleType="fitXY"
-                android:src="@drawable/effect" />
+                android:layout_marginLeft="35dp"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:id="@+id/tv_current"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="65dp"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/current_num"
+                    android:textSize="36dp" />
+
+                <com.mdground.screen.view.FlickerTextView
+                    android:layout_toRightOf="@+id/tv_current"
+                    android:id="@+id/tv_opNO"
+                    style="@style/TextAppearance.Large.Dark.Bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10"
+                    android:layout_marginLeft="30dp"
+                    android:textSize="210sp"
+                    android:visibility="visible" />
+            </RelativeLayout>
         </LinearLayout>
 
         <RelativeLayout
-            android:layout_width="500dp"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-25dp" >
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:orientation="vertical" >
-
-                <ImageView
-                    android:layout_width="560dp"
-                    android:layout_height="172dp"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/box1" />
-            </LinearLayout>
+            android:background="@drawable/doctor_name_bg"
+            android:padding="10dp" >
 
             <TextView
                 android:id="@+id/name_txt"
-                style="@style/TextAppearance.Big.Dark"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
+                android:layout_marginLeft="70dp"
                 android:ellipsize="end"
                 android:gravity="center"
                 android:singleLine="true"
                 android:text="李医生"
-                android:textColor="@color/normal_black"
-                android:textSize="72sp" />
+                android:textColor="@android:color/white"
+                android:textSize="60sp" />
         </RelativeLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_44"
-        android:orientation="vertical" >
-
-        <TextView
-            style="@style/TextAppearance.Small.Dark"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="132dp"
-            android:layout_marginTop="114dp"
-            android:text="@string/current_num"
-            android:textSize="60dp" />
-
-        <com.mdground.screen.view.FlickerTextView
-            android:id="@+id/current_num"
-            style="@style/TextAppearance.Large.Dark.Bold"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_10"
-            android:gravity="center"
-            android:text="1024"
-            android:textSize="279sp"
-            android:visibility="invisible" />
 
         <TextView
             style="@style/TextAppearance.Small.Dark"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="114dp"
-            android:layout_marginTop="@dimen/margin_10"
+            android:layout_marginLeft="80dp"
+             android:layout_marginTop="25dp"
             android:gravity="center"
             android:text="@string/next_num"
-            android:textSize="60dp" />
+            android:textSize="35dp" />
 
         <com.mdground.screen.view.TwoWayGridView
             xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/gridview"
-            android:layout_width="840dp"
-            android:layout_height="300dp"
-            android:layout_marginLeft="114dp"
-            android:layout_marginTop="@dimen/margin_7"
-            app:columnWidth="210dp"
+            android:layout_width="1750dp"
+            android:layout_height="420dp"
+            android:layout_marginLeft="60dp"
+            android:layout_marginTop="25dp"
+            app:columnWidth="250dp"
             app:gravity="center"
             app:horizontalSpacing="1dip"
-            app:numColumns="4"
-            app:numRows="3"
-            app:rowHeight="100dp"
+            app:numColumns="7"
+            app:numRows="4"
+            app:rowHeight="105dp"
             app:scrollDirectionLandscape="horizontal"
             app:scrollDirectionPortrait="vertical"
-            app:stretchMode="columnWidth"
+            app:stretchMode="spacingWidthUniform"
             app:verticalSpacing="0dip" />
     </LinearLayout>
 
-</LinearLayout>
+    <ImageView
+        android:id="@+id/iv_clip"
+        android:layout_width="70dp"
+        android:layout_height="109dp"
+        android:layout_marginLeft="80dp"
+        android:src="@drawable/icon_clip" />
+
+</RelativeLayout>
