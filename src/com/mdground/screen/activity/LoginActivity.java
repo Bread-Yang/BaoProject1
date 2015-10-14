@@ -256,6 +256,7 @@ public class LoginActivity extends Activity implements OnClickListener, OnResize
 
 					Intent intent = new Intent(LoginActivity.this, MainActivity.class);
 					startActivity(intent);
+					finish();
 				} else {
 					Toast.makeText(getApplicationContext(), "账号异常,请联系客服", Toast.LENGTH_SHORT).show();
 				}

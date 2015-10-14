@@ -133,78 +133,90 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 	class ClientReciver extends BroadcastReceiver {
 
 		@Override
-		public void onReceive(Context context, Intent intent) {
-			if ("com.mdground.message".equals(intent.getAction())) {
-				String message = intent.getStringExtra("message");
+		public void onReceive(Context context, final Intent intent) {
 
-				// Toast.makeText(MainActivity.this,
-				// intent.getStringExtra("message"), Toast.LENGTH_SHORT)
-				// .show();
+			runOnUiThread(new Runnable() {
+				public void run() {
+					if ("com.mdground.message".equals(intent.getAction())) {
+						String message = intent.getStringExtra("message");
 
-				// L.e(MainActivity.this, "app发过来的socket信息是 : " + message);
+						// Toast.makeText(MainActivity.this,
+						// intent.getStringExtra("message"), Toast.LENGTH_SHORT)
+						// .show();
 
-				JSONObject json;
+						L.e(MainActivity.this, "app发过来的socket信息是 : ");
 
-				try {
-					json = new JSONObject(message);
+						JSONObject json;
 
-					int opNO = json.getInt("OPNo");
-					int doctorID = json.getInt("DoctorID");
+						try {
+							json = new JSONObject(message);
 
-					int action = json.getInt("Action");
+							int opNO = json.getInt("OPNo");
+							int doctorID = json.getInt("DoctorID");
 
-					if (action == 1) { // 叫号
-						// 如果当前发过来的opNO是正在播放的,则不添加进队列里面
+							int action = json.getInt("Action");
 
-						// 当正在播放林医生的叫号时,这时收到黄医生的叫号,则继续播放林医生的叫号,不过要在导诊屏上的黄医生的位置显示黄医生的叫号
-						if (!isOpNoTextViewVisible(doctorID)) {
-							startCallPatient(doctorID, opNO);
-						}
+							if (action == 1) { // 叫号
+								// 如果当前发过来的opNO是正在播放的,则不添加进队列里面
 
-						// 当正在播放4001号的叫号时,在播放两次声音的时间之内,又收到了一次同样是4001号的叫号,则只播放两次,而不是播放四次4001的叫号
-						if (currentSpeechMessage != null) {
-							CallAppointment currentCall = new CallAppointment(currentSpeechMessage);
-							if (currentCall.getOpNO() == opNO) {
-								return;
-							}
-						}
+								// 当正在播放林医生的叫号时,这时收到黄医生的叫号,则继续播放林医生的叫号,不过要在导诊屏上的黄医生的位置显示黄医生的叫号
+								if (!isOpNoTextViewVisible(doctorID)) {
+									startCallPatient(doctorID, opNO);
+								}
 
-						if (speechQueue.size() == 0
-								&& speechSynthesizer.getPlayerStatus() == SpeechSynthesizer.PLAYER_STATE_IDLE
-								&& currentSpeechCount == 0) {
-							speech(message);
-						} else {
+								// 当正在播放4001号的叫号时,在播放两次声音的时间之内,又收到了一次同样是4001号的叫号,则只播放两次,而不是播放四次4001的叫号
+								if (currentSpeechMessage != null) {
+									CallAppointment currentCall = new CallAppointment(currentSpeechMessage);
+									if (currentCall.getOpNO() == opNO) {
+										return;
+									}
+								}
 
-							for (String callMessage : speechQueue) {
-								if (opNO == new JSONObject(callMessage).getInt("OPNo")) {
-									return;
+								L.e(this,
+										" speechSynthesizer.getPlayerStatus() == SpeechSynthesizer.PLAYER_STATE_IDLE : "
+												+ (speechSynthesizer
+														.getPlayerStatus() == SpeechSynthesizer.PLAYER_STATE_IDLE));
+								L.e(this, "currentSpeechCount == " + currentSpeechCount);
+
+								if (speechQueue.size() == 0
+										&& speechSynthesizer.getPlayerStatus() == SpeechSynthesizer.PLAYER_STATE_IDLE
+										&& currentSpeechCount == 0) {
+									speech(message);
+								} else {
+
+									for (String callMessage : speechQueue) {
+										if (opNO == new JSONObject(callMessage).getInt("OPNo")) {
+											return;
+										}
+									}
+									L.e(this, "speechQueue.offer(message)执行了");
+									speechQueue.offer(message);
+								}
+							} else if (action == 2) { // 状态上报
+
+								int OPStatus = json.getInt("OPStatus");
+
+								if ((OPStatus & Appointment.STATUS_DIAGNOSING) != 0) {
+									showStartOpNO(doctorID, opNO); // 开始
+
+									// 重新拉一次数据
+
+									getAppointmentListByDoctor(doctorsIndex.get(String.valueOf(doctorID)), doctorID);
+									// for (int i = 0; i < doctorsArray.size();
+									// i++) {
+									// getAppointmentListByDoctor(i, (int)
+									// doctorsArray.get(i).getDoctorID());
+									// }
+								} else if ((OPStatus & Appointment.STATUS_FINISH) != 0) { // 结束
+									hideOpNO(doctorID, opNO);
 								}
 							}
-
-							speechQueue.offer(message);
-						}
-					} else if (action == 2) { // 状态上报
-
-						int OPStatus = json.getInt("OPStatus");
-
-						if ((OPStatus & Appointment.STATUS_DIAGNOSING) != 0) {
-							showStartOpNO(doctorID, opNO); // 开始
-
-							// 重新拉一次数据
-
-							getAppointmentListByDoctor(doctorsIndex.get(String.valueOf(doctorID)), doctorID);
-							// for (int i = 0; i < doctorsArray.size(); i++) {
-							// getAppointmentListByDoctor(i, (int)
-							// doctorsArray.get(i).getDoctorID());
-							// }
-						} else if ((OPStatus & Appointment.STATUS_FINISH) != 0) { // 结束
-							hideOpNO(doctorID, opNO);
+						} catch (JSONException e) {
+							e.printStackTrace();
 						}
 					}
-				} catch (JSONException e) {
-					e.printStackTrace();
 				}
-			}
+			});
 		}
 	}
 
@@ -280,7 +292,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 		// UpdateManager manager = new UpdateManager(MainActivity.this);
 		// manager.showDownloadDialog();
 		// }
-		// }, 10000);
+		// }, 5000);
 
 		// new Handler().postDelayed(new Runnable() {
 		// public void run() {
@@ -328,6 +340,13 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 	// return description;
 	// }
 	// }
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		Intent intent = new Intent(this, LoginActivity.class);
+		startActivity(intent);
+	}
 
 	private void findViewById() {
 		viewPager = (GridViewPager) findViewById(R.id.gvp);
@@ -1023,6 +1042,12 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 	}
 
 	private void speech(String message) {
+		
+		L.e(this, "speech()方法执行了");
+		
+		if (message == null) {
+			return;
+		}
 		currentSpeechMessage = message;
 		try {
 
@@ -1042,22 +1067,21 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 			// }
 
 			String speechString = null;
-//			if (doctorName.endsWith("医生")) {
-//				speechString = "请  " + opNO + "  号到" + doctorName + "处就诊";
-//			} else {
-//				speechString = "请  " + opNO + "  号到" + doctorName + "医生处就诊";
-//			}
-			
-			speechString = "请  " + opNO + "  号到" + doctorName + "处就诊";
-			
+			if (doctorName.endsWith("医生")) {
+				speechString = "请" + opNO + "号到" + doctorName + "处就诊";
+			} else {
+				speechString = "请" + opNO + "号到" + doctorName + "医生处就诊";
+			}
+
 			// 播放语音
 			speechSynthesizer.speak(speechString);
 
 			// 显示多个医生的时候
 
 			if (doctorsArray.size() > 1) {
+				String showString = "请  " + opNO + "  号到" + doctorName + "处就诊";
 				// 在顶部高亮
-				SpannableString ss = new SpannableString(speechString);
+				SpannableString ss = new SpannableString(showString);
 				ss.setSpan(new CustomTypefaceSpan("", ttf_NotoSans_Bold), 3, 3 + String.valueOf(opNO).length(),
 						Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
 				ss.setSpan(new RelativeSizeSpan(1.4f), 3, 3 + String.valueOf(opNO).length(),
@@ -1127,6 +1151,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 
 	@Override
 	public void onCancel(SpeechSynthesizer arg0) {
+		L.e(this, "百度语音取消了");
 		speechQueue.clear();
 		currentSpeechCount = 0;
 		currentSpeechMessage = null;
@@ -1134,7 +1159,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 
 	@Override
 	public void onError(SpeechSynthesizer arg0, SpeechError arg1) {
-		L.e(this, "onError(SpeechSynthesizer arg0, SpeechError arg1)");
+		L.e(this, "百度语音出错了 onError(SpeechSynthesizer arg0, SpeechError arg1)");
 		speechQueue.clear();
 		currentSpeechCount = 0;
 		currentSpeechMessage = null;
@@ -1187,9 +1212,26 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 
 	@Override
 	public void onSpeechPause(SpeechSynthesizer arg0) {
+		L.e(this, "百度语音暂停了");
+		
+		JSONObject json;
+		try {
+			json = new JSONObject(currentSpeechMessage);
+			int opNO = json.getInt("OPNo");
+			int doctorID = json.getInt("DoctorID");
+			stopCallPatient(doctorID, opNO);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		speechQueue.clear();
+		currentSpeechCount = 0;
+		currentSpeechMessage = null;
+		tv_highlight_num.setVisibility(View.INVISIBLE);
 
+		initBaiduTTS();
 	}
-
+	
 	@Override
 	public void onSpeechProgressChanged(SpeechSynthesizer arg0, int arg1) {
 
