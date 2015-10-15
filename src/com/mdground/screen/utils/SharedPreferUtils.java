@@ -10,7 +10,7 @@ public class SharedPreferUtils {
 	SharedPreferences share;
 
 	public enum ShareKey {
-		ClinicID, UserNickname, UserId, UserPsw, DEVICE_ID;
+		ClinicID, UserNickname, UserId, UserPsw, DEVICE_ID, XGPush_Token;
 	}
 
 	public SharedPreferUtils(Context context) {

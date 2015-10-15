@@ -244,7 +244,7 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 
 					// 更新列表的推送
 					if ("RefreshAppointment".equals(functionName)) {
-						Toast.makeText(getApplicationContext(), "收到重新更新列表的推送", Toast.LENGTH_SHORT).show();
+//						Toast.makeText(getApplicationContext(), "收到重新更新列表的推送", Toast.LENGTH_SHORT).show();
 
 						int doctorId = Integer.valueOf(content);
 

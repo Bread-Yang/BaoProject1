@@ -425,8 +425,8 @@ containing a value of this type.
         public static final int tab_selector=0x7f02002f;
     }
     public static final class id {
-        public static final int LoginID=0x7f0a0027;
-        public static final int action_settings=0x7f0a0034;
+        public static final int LoginID=0x7f0a0026;
+        public static final int action_settings=0x7f0a0033;
         public static final int alwaysScroll=0x7f0a000c;
         public static final int auto_fit=0x7f0a0015;
         public static final int bottom=0x7f0a0000;
@@ -443,41 +443,40 @@ containing a value of this type.
         public static final int fill=0x7f0a0006;
         public static final int fill_horizontal=0x7f0a0007;
         public static final int fill_vertical=0x7f0a0008;
-        public static final int gridview=0x7f0a002d;
-        public static final int guide_indicator=0x7f0a0023;
+        public static final int gridview=0x7f0a002c;
         public static final int gvp=0x7f0a001f;
         public static final int horizontal=0x7f0a000f;
         public static final int iv_account=0x7f0a0018;
-        public static final int iv_avatar=0x7f0a002a;
+        public static final int iv_avatar=0x7f0a0029;
         public static final int iv_clear_account=0x7f0a001a;
         public static final int iv_clear_password=0x7f0a001d;
-        public static final int iv_clip=0x7f0a002e;
-        public static final int iv_line=0x7f0a0028;
+        public static final int iv_clip=0x7f0a002d;
+        public static final int iv_line=0x7f0a0027;
         public static final int iv_password=0x7f0a001b;
-        public static final int iv_yizhida=0x7f0a0031;
+        public static final int iv_yizhida=0x7f0a0030;
         public static final int left=0x7f0a0009;
-        public static final int loading_gif=0x7f0a0026;
+        public static final int loading_gif=0x7f0a0025;
         public static final int login_root_layout=0x7f0a0016;
-        public static final int name_txt=0x7f0a002c;
+        public static final int name_txt=0x7f0a002b;
         public static final int none=0x7f0a0012;
         public static final int normal=0x7f0a000e;
         public static final int page=0x7f0a0021;
         public static final int page_view=0x7f0a0020;
-        public static final int rg_page=0x7f0a0024;
+        public static final int rg_page=0x7f0a0023;
         public static final int right=0x7f0a000a;
         public static final int scrollView=0x7f0a0017;
-        public static final int scrollview=0x7f0a0029;
+        public static final int scrollview=0x7f0a0028;
         public static final int spacingWidth=0x7f0a0013;
         public static final int spacingWidthUniform=0x7f0a0014;
         public static final int top=0x7f0a000b;
-        public static final int tv_current=0x7f0a0032;
+        public static final int tv_current=0x7f0a0031;
         public static final int tv_highlight_num=0x7f0a0022;
-        public static final int tv_num=0x7f0a0030;
-        public static final int tv_opNO=0x7f0a002b;
-        public static final int update_progress=0x7f0a0033;
+        public static final int tv_num=0x7f0a002f;
+        public static final int tv_opNO=0x7f0a002a;
+        public static final int update_progress=0x7f0a0032;
         public static final int vertical=0x7f0a0010;
-        public static final int view_seperator=0x7f0a002f;
-        public static final int viewpager=0x7f0a0025;
+        public static final int view_seperator=0x7f0a002e;
+        public static final int viewpager=0x7f0a0024;
     }
     public static final class layout {
         public static final int activity_login=0x7f030000;

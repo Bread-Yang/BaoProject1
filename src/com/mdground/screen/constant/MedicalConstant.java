@@ -30,4 +30,7 @@ public class MedicalConstant {
 	//保存二维码目录
 	public static final String APP_QRCODE = "/qrcode";
 	
+	public static final String UNISOUND_APPKEY = "oyz2jok2gy4ihygnq372ksnxm6cmgpsiym5gluqd";
+	public static final String  UNISOUND_SECRET = "a2bdd3a6b5a8999afd73154157a3a22d";
+	
 }

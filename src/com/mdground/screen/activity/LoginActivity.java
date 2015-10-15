@@ -188,6 +188,14 @@ public class LoginActivity extends Activity implements OnClickListener, OnResize
 		String token = XGPushConfig.getToken(getApplicationContext());
 		L.e(LoginActivity.this, "token是 : " + token);
 		
+		if (token == null || "".equals(token)) {
+			Toast.makeText(this, "信鸽token为空,登录失败", Toast.LENGTH_SHORT).show();
+			XGPushManager.registerPush(getApplicationContext());
+			return;
+		} else {
+			new DeviceIDUtil().saveXgPushTokenToSDCard(token);
+		}
+		
 		device.setDeviceToken(token);
 
 		new LoginEmployee(this).loginEmployee(userName, password, device, new RequestCallBack() {
@@ -211,7 +219,7 @@ public class LoginActivity extends Activity implements OnClickListener, OnResize
 				((MedicalAppliction) LoginActivity.this.getApplication()).setLoginEmployee(employee);
 
 				new SharedPreferUtils(getApplicationContext()).put(ShareKey.DEVICE_ID, employee.getDeviceID());
-
+				
 				PreferenceUtils.setPrefLong(getApplicationContext(), MemberConstant.LOGIN_EMPLOYEE,
 						employee.getEmployeeID());
 				PreferenceUtils.setPrefInt(getApplicationContext(), MemberConstant.LOGIN_STATUS,
@@ -254,7 +262,7 @@ public class LoginActivity extends Activity implements OnClickListener, OnResize
 //						}
 //					});
 
-					Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+					Intent intent = new Intent(LoginActivity.this, UnisoundMainactivity.class);
 					startActivity(intent);
 					finish();
 				} else {

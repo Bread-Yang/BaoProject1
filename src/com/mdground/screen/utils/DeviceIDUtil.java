@@ -12,6 +12,7 @@ import android.os.Environment;
 public class DeviceIDUtil {
 
 	private static String fileName = "YiDeGuanScreen.txt";
+	private static String xgpushTokenFileName = "YiDeGuanScreenToken.txt";
 
 	public int getDeviceID() {
 		File file = new File(Environment.getExternalStorageDirectory(),
@@ -43,6 +44,23 @@ public class DeviceIDUtil {
 			out = new FileOutputStream(file, false); 
 			String content = String.valueOf(deviceID);
 			out.write(content.getBytes());
+			out.close();
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	public void saveXgPushTokenToSDCard(String token) {
+		File file = new File(Environment.getExternalStorageDirectory(),
+				xgpushTokenFileName);
+		try {
+			OutputStream out;
+			out = new FileOutputStream(file, false); 
+			out.write(token.getBytes());
 			out.close();
 
 		} catch (FileNotFoundException e) {

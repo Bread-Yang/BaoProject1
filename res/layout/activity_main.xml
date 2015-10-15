@@ -47,15 +47,6 @@
         android:textColor="@android:color/white"
         android:textSize="95sp" />
     
-    <com.shizhefei.view.indicator.FixedIndicatorView
-        android:id="@+id/guide_indicator"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:gravity="center"
-        />
-    
     <RadioGroup
         android:id="@+id/rg_page"
         android:layout_width="fill_parent"
