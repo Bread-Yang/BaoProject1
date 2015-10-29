@@ -64,6 +64,8 @@ public class MedicalAppliction extends MdgAppliction {
 		ImageLoaderConfiguration configuration = new ImageLoaderConfiguration.Builder(getApplicationContext())
 				.imageDownloader(new MedicalImageDownload(getApplicationContext())).build();
 		ImageLoader.getInstance().init(configuration);
+		
+		L.e(this, "导诊屏的分辨率 : " + this.getResources().getDisplayMetrics().density);
 	}
 
 	public MedicalAppliction() {

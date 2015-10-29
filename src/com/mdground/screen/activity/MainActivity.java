@@ -552,10 +552,8 @@ public class MainActivity extends BaseActivity implements SpeechSynthesizerListe
 								JSONObject item = jsonArray.getJSONObject(i);
 								Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 								Appointment appointment = gson.fromJson(item.toString(), Appointment.class);
-
-								// L.e(MainActivity.this,
-								// "appointment.getOPStatus() : " +
-								// appointment.getOPStatus());
+								 
+//								L.e(MainActivity.this, "appointment.isEmergency() : " + appointment.isEmergency());
 
 								if ((appointment.getOPStatus() & Appointment.STATUS_WATTING) != 0
 										&& (appointment.getOPStatus() & Appointment.STATUS_DIAGNOSING) == 0) {

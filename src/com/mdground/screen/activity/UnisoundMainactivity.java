@@ -798,6 +798,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 				holder.tv_num = (TextView) convertView.findViewById(R.id.tv_num);
 				holder.tv_num.setTypeface(ttf_NotoSans_Regular);
 				holder.iv_yizhida = (ImageView) convertView.findViewById(R.id.iv_yizhida);
+				holder.iv_emergency = (ImageView) convertView.findViewById(R.id.iv_emergency);
 				convertView.setTag(R.layout.item_num, holder);
 			} else {
 				holder = (NumViewHolder) convertView.getTag(R.layout.item_num);
@@ -815,6 +816,14 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 			} else {
 				holder.iv_yizhida.setVisibility(View.INVISIBLE);
 			}
+			
+			if (appointment.isEmergency()) {
+				holder.iv_yizhida.setVisibility(View.GONE);
+				holder.iv_emergency.setVisibility(View.VISIBLE);
+			} else {
+				holder.iv_emergency.setVisibility(View.GONE);
+			}
+			
 			if (position < countLimit) {
 				holder.tv_num.setText(String.valueOf(appointment.getOPNo()));
 				convertView.setVisibility(View.VISIBLE);
@@ -969,7 +978,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 
 	static class NumViewHolder {
 		TextView tv_num;
-		ImageView iv_yizhida;
+		ImageView iv_yizhida, iv_emergency;
 	}
 
 	final Handler handler = new Handler() {
