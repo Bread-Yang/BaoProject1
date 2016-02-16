@@ -5,7 +5,6 @@ import com.mdground.screen.activity.LoginActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 public class BootBroadcastReceiver extends BroadcastReceiver {
 

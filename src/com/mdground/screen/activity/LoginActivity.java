@@ -1,17 +1,15 @@
 package com.mdground.screen.activity;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 import org.apache.http.Header;
 import org.mdground.api.base.PlatformType;
 import org.mdground.api.base.RequestCallBack;
+import org.mdground.api.base.ResponseCode;
 import org.mdground.api.base.ResponseData;
+import org.mdground.api.bean.Clinic;
 import org.mdground.api.bean.Device;
 import org.mdground.api.bean.Employee;
+import org.mdground.api.server.clinic.GetClinic;
 import org.mdground.api.server.global.LoginEmployee;
-import org.mdground.api.server.global.UpdateDeviceToken;
 import org.mdground.api.utils.DeviceUtils;
 
 import com.mdground.screen.MedicalAppliction;
@@ -40,7 +38,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -207,8 +204,6 @@ public class LoginActivity extends Activity implements OnClickListener, OnResize
 
 			@Override
 			public void onSuccess(ResponseData response) {
-				L.e(LoginActivity.this, "登录返回的信息是 : " + response.getContent());
-
 				Employee employee = response.getContent(Employee.class);
  
 				if (response.Code != 0) {
@@ -261,10 +256,7 @@ public class LoginActivity extends Activity implements OnClickListener, OnResize
 //
 //						}
 //					});
-
-					Intent intent = new Intent(LoginActivity.this, UnisoundMainactivity.class);
-					startActivity(intent);
-					finish();
+					getClinic();
 				} else {
 					Toast.makeText(getApplicationContext(), "账号异常,请联系客服", Toast.LENGTH_SHORT).show();
 				}
@@ -284,6 +276,38 @@ public class LoginActivity extends Activity implements OnClickListener, OnResize
 				L.e(LoginActivity.this, throwable.toString());
 			}
 		});
+	}
+	
+	private void getClinic() {
+		new GetClinic(getApplicationContext()).getClinic(new RequestCallBack() {
+            @Override
+            public void onStart() {
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+
+            }
+
+            @Override
+            public void onFinish() {
+
+            }
+
+            @Override
+            public void onSuccess(ResponseData response) {
+                if (response.getCode() == ResponseCode.Normal.getValue()) {
+                    MedicalAppliction application = (MedicalAppliction) getApplication();
+
+                    application.setmClinic(response.getContent(Clinic.class)); 
+
+					Intent intent = new Intent(LoginActivity.this, UnisoundMainactivity.class);
+					startActivity(intent);
+					finish();
+                }
+            }
+        });
 	}
 
 	@Override

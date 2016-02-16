@@ -16,6 +16,8 @@
 
 package com.mdground.screen.view.dialog;
 
+import com.mdground.screen.R;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
@@ -26,8 +28,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-
-import com.mdground.screen.R;
 
 public class LoadingDialog extends Dialog {
 

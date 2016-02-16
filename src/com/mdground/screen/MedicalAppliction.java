@@ -2,9 +2,9 @@ package com.mdground.screen;
 
 import org.mdground.api.MdgAppliction;
 import org.mdground.api.base.PlatformType;
+import org.mdground.api.bean.Clinic;
 import org.mdground.api.bean.Employee;
 
-import com.iflytek.cloud.SpeechUtility;
 import com.mdground.screen.constant.MemberConstant;
 import com.mdground.screen.utils.L;
 import com.mdground.screen.utils.MedicalImageDownload;
@@ -21,6 +21,9 @@ import android.content.Intent;
 public class MedicalAppliction extends MdgAppliction {
 
 	public static Employee employee;// 登陆用户
+	
+	private Clinic mClinic; // 诊所信息 
+
 
 	@Override
 	public void onCreate() {
@@ -77,6 +80,14 @@ public class MedicalAppliction extends MdgAppliction {
 
 	public void setLoginEmployee(Employee employee) {
 		this.employee = employee;
+	}
+
+	public Clinic getmClinic() {
+		return mClinic;
+	}
+
+	public void setmClinic(Clinic mClinic) {
+		this.mClinic = mClinic;
 	}
 
 	@Override

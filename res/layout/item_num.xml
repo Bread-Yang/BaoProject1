@@ -18,11 +18,11 @@
 
         <TextView
             android:id="@+id/tv_num"
-            android:layout_width="219dp"
+            android:layout_width="239dp"
             android:layout_height="fill_parent"
             android:layout_toRightOf="@+id/view_seperator"
-            android:gravity="center"
-            android:text="1025"
+            android:gravity="left|center_vertical"
+            android:singleLine="true"
             android:textColor="#CC374043"
             android:textSize="75sp"
             android:textStyle="bold" />

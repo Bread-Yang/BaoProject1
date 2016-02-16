@@ -1,15 +1,13 @@
 package com.mdground.screen.receiver;
 
+import com.mdground.screen.utils.L;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v4.content.LocalBroadcastManager;
-import android.widget.Toast;
-
-import com.mdground.screen.R;
-import com.mdground.screen.utils.L;
 
 public class ConnectChangeReceiver extends BroadcastReceiver {
 

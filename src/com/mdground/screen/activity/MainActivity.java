@@ -72,7 +72,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class MainActivity extends BaseActivity implements SpeechSynthesizerListener {

@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import com.mdground.screen.socket.Client;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
-
-import com.mdground.screen.socket.Client;
 
 /**
  * 接收数据服务

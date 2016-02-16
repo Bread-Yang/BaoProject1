@@ -1,8 +1,8 @@
 package com.mdground.screen.activity;
 
-import android.support.v4.app.FragmentActivity;
-
 import com.mdground.screen.utils.AppManager;
+
+import android.support.v4.app.FragmentActivity;
 
 public class BaseActivity extends FragmentActivity {
 

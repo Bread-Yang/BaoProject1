@@ -6,11 +6,6 @@ import java.util.Calendar;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
-import android.widget.Toast;
-
 import com.mdground.screen.po.XGNotification;
 import com.mdground.screen.utils.L;
 import com.tencent.android.tpush.XGPushBaseReceiver;
@@ -18,6 +13,10 @@ import com.tencent.android.tpush.XGPushClickedResult;
 import com.tencent.android.tpush.XGPushRegisterResult;
 import com.tencent.android.tpush.XGPushShowedResult;
 import com.tencent.android.tpush.XGPushTextMessage;
+
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 
 public class MessageReceiver extends XGPushBaseReceiver {
 	private Intent intent = new Intent("com.mdground.screen.xgPush");

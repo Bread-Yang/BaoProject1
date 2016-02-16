@@ -8,11 +8,11 @@ import org.mdground.api.base.ResponseCode;
 import org.mdground.api.base.ResponseData;
 import org.mdground.api.server.fileserver.GetFile;
 
+import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
+
 import android.content.Context;
 import android.util.Base64;
 import android.util.Log;
-
-import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
 
 /**
  * 图片下载类

@@ -20,13 +20,9 @@ import org.mdground.api.bean.Doctor;
 import org.mdground.api.server.clinic.GetAppointmentInfoListByDoctor;
 import org.mdground.api.server.global.GetDoctorList;
 
-import com.baidu.speechsynthesizer.SpeechSynthesizer;
-import com.baidu.speechsynthesizer.SpeechSynthesizerListener;
-import com.baidu.speechsynthesizer.publicutility.DataInfoUtils;
-import com.baidu.speechsynthesizer.publicutility.SpeechError;
-import com.baidu.speechsynthesizer.publicutility.SpeechLogger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mdground.screen.MedicalAppliction;
 import com.mdground.screen.R;
 import com.mdground.screen.constant.MedicalConstant;
 import com.mdground.screen.fonts.CustomTypefaceSpan;
@@ -51,7 +47,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -73,7 +68,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 import cn.yunzhisheng.tts.offline.TTSPlayerListener;
 import cn.yunzhisheng.tts.offline.basic.ITTSControl;
 import cn.yunzhisheng.tts.offline.basic.TTSFactory;
@@ -148,11 +142,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 					if ("com.mdground.message".equals(intent.getAction())) {
 						String message = intent.getStringExtra("message");
 
-						// Toast.makeText(MainActivity.this,
-						// intent.getStringExtra("message"), Toast.LENGTH_SHORT)
-						// .show();
-
-						L.e(UnisoundMainactivity.this, "app发过来的socket信息是 : ");
+						L.e(UnisoundMainactivity.this, "服务器推送过来的信息是 : " + message);
 
 						JSONObject json;
 
@@ -165,36 +155,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 							int action = json.getInt("Action");
 
 							if (action == 1) { // 叫号
-								// 如果当前发过来的opNO是正在播放的,则不添加进队列里面
-
-								// 当正在播放林医生的叫号时,这时收到黄医生的叫号,则继续播放林医生的叫号,不过要在导诊屏上的黄医生的位置显示黄医生的叫号
-								if (!isOpNoTextViewVisible(doctorID)) {
-									startCallPatient(doctorID, opNO);
-								}
-
-								// 当正在播放4001号的叫号时,在播放两次声音的时间之内,又收到了一次同样是4001号的叫号,则只播放两次,而不是播放四次4001的叫号
-								if (currentSpeechMessage != null) {
-									CallAppointment currentCall = new CallAppointment(currentSpeechMessage);
-									if (currentCall.getOpNO() == opNO) {
-										return;
-									}
-								}
-
-								L.e(this, "isPlaying : " + isPlaying);
-								L.e(this, "currentSpeechCount == " + currentSpeechCount);
-
-								if (speechQueue.size() == 0 && !isPlaying && currentSpeechCount == 0) {
-									speech(message);
-								} else {
-
-									for (String callMessage : speechQueue) {
-										if (opNO == new JSONObject(callMessage).getInt("OPNo")) {
-											return;
-										}
-									}
-									L.e(this, "speechQueue.offer(message)执行了");
-									speechQueue.offer(message);
-								}
+								callAction(doctorID, opNO, message);
 							} else if (action == 2) { // 状态上报
 
 								int OPStatus = json.getInt("OPStatus");
@@ -204,7 +165,12 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 
 									// 重新拉一次数据
 
-									getAppointmentListByDoctor(doctorsIndex.get(String.valueOf(doctorID)), doctorID);
+									Integer index = doctorsIndex.get(String.valueOf(doctorID));
+
+									if (index != null) {
+										getAppointmentListByDoctor(index, doctorID);
+									}
+
 									// for (int i = 0; i < doctorsArray.size();
 									// i++) {
 									// getAppointmentListByDoctor(i, (int)
@@ -234,10 +200,10 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 				String title = intent.getStringExtra("title");
 				String content = intent.getStringExtra("content");
 				String customContent = intent.getStringExtra("customContent");
-				// L.e(MainActivity.this, "拿到的title : " + title);
-				// L.e(MainActivity.this, "拿到的content : " + content);
-				// L.e(MainActivity.this, "拿到的customContent : " +
-				// customContent);
+				 L.e(UnisoundMainactivity.this, "拿到的title : " + title);
+				 L.e(UnisoundMainactivity.this, "拿到的content : " + content);
+				 L.e(UnisoundMainactivity.this, "拿到的customContent : " +
+				 customContent);
 
 				L.e(UnisoundMainactivity.this, "收到推送");
 
@@ -245,9 +211,10 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 					JSONObject json = new JSONObject(customContent);
 					String functionName = json.getString("FunctionName");
 
-					// 更新列表的推送
+					// 更新列表的推送 
 					if ("RefreshAppointment".equals(functionName)) {
-//						Toast.makeText(getApplicationContext(), "收到重新更新列表的推送", Toast.LENGTH_SHORT).show();
+						// Toast.makeText(getApplicationContext(),
+						// "收到重新更新列表的推送", Toast.LENGTH_SHORT).show();
 
 						int doctorId = Integer.valueOf(content);
 
@@ -268,6 +235,14 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 					} else if ("UpgradeScreenVersion".equals(functionName)) { // 更新
 						UpdateManager manager = new UpdateManager(UnisoundMainactivity.this);
 						manager.showDownloadDialog();
+					} else if ("CallAppointment".equals(functionName)) { // 叫号
+						L.e(this, "收到叫号推送");
+						JSONObject messageJson = new JSONObject(content);
+
+						int opNO = messageJson.getInt("OPNo");
+						int doctorID = messageJson.getInt("DoctorID");
+						
+						callAction(doctorID, opNO, content);
 					}
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -313,36 +288,50 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 		// MyCrashManagerListener());
 	}
 
-	// private static class MyCrashManagerListener extends CrashManagerListener
-	// {
-	//
-	// public boolean shouldAutoUploadCrashes() {
-	// return true;
-	// }
-	//
-	// public String getDescription() {
-	// String description = "";
-	//
-	// try {
-	// Process process = Runtime.getRuntime().exec("logcat -d *:E");
-	// BufferedReader bufferedReader = new BufferedReader(new
-	// InputStreamReader(process.getInputStream()));
-	//
-	// StringBuilder log = new StringBuilder();
-	// String line;
-	// while ((line = bufferedReader.readLine()) != null) {
-	// log.append(line);
-	// log.append(System.getProperty("line.separator"));
-	// }
-	// bufferedReader.close();
-	//
-	// description = log.toString();
-	// } catch (IOException e) {
-	// }
-	//
-	// return description;
-	// }
-	// }
+	private void callAction(int doctorID, int opNO, String message) {
+		// 如果当前发过来的opNO是正在播放的,则不添加进队列里面
+
+		// 当正在播放林医生的叫号时,这时收到黄医生的叫号,则继续播放林医生的叫号,不过要在导诊屏上的黄医生的位置显示黄医生的叫号
+		if (!isOpNoTextViewVisible(doctorID)) {
+			JSONObject json;
+			try {
+				json = new JSONObject(message);
+
+				String patientName = json.getString("PatientName");
+				startCallPatient(doctorID, opNO, patientName);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+
+		// 当正在播放4001号的叫号时,在播放两次声音的时间之内,又收到了一次同样是4001号的叫号,则只播放两次,而不是播放四次4001的叫号
+		if (currentSpeechMessage != null) {
+			CallAppointment currentCall = new CallAppointment(currentSpeechMessage);
+			if (currentCall.getOpNO() == opNO) {
+				return;
+			}
+		}
+
+		L.e(this, "isPlaying : " + isPlaying);
+		L.e(this, "currentSpeechCount == " + currentSpeechCount);
+
+		if (speechQueue.size() == 0 && !isPlaying && currentSpeechCount == 0) {
+			speech(message);
+		} else {
+
+			for (String callMessage : speechQueue) {
+				try {
+					if (opNO == new JSONObject(callMessage).getInt("OPNo")) {
+						return;
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+			L.e(this, "speechQueue.offer(message)执行了");
+			speechQueue.offer(message);
+		}
+	}
 
 	@Override
 	public void onBackPressed() {
@@ -423,12 +412,12 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 		// 初始化语音合成对象
 		mTTSPlayer = TTSFactory.createTTSControl(this, MedicalConstant.UNISOUND_APPKEY);
 		// 设置音频流
-//		mTTSPlayer.setStreamType(AudioManager.STREAM_ALARM);
- 		// 设置播放语速
-//		mTTSPlayer.setVoiceSpeed(0f);
+		// mTTSPlayer.setStreamType(AudioManager.STREAM_ALARM);
+		// 设置播放语速
+		// mTTSPlayer.setVoiceSpeed(0f);
 		mTTSPlayer.setVoiceSpeed(0.1f);
 		// 设置播报音高
-//		mTTSPlayer.setVoicePitch(100f);
+		// mTTSPlayer.setVoicePitch(100f);
 		mTTSPlayer.setVoicePitch(0.9f);
 		// 设置回调监听
 		mTTSPlayer.setTTSListener(this);
@@ -620,6 +609,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 					convertView = inflater.inflate(R.layout.item_normal_docotor, null);
 					holder = new DocotorViewHolder();
 					holder.iv_avatar = (ImageView) convertView.findViewById(R.id.iv_avatar);
+					holder.tv_current_tips = (TextView) convertView.findViewById(R.id.tv_current_tips);
 					holder.tv_name = (TextView) convertView.findViewById(R.id.name_txt);
 					holder.tv_opNO = (FlickerTextView) convertView.findViewById(R.id.tv_opNO);
 					holder.tv_opNO.setTypeface(ttf_NotoSans_Bold);
@@ -636,6 +626,12 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 				} else {
 					// holder.iv_line.setVisibility(View.VISIBLE);
 				}
+				if (isShowPatientOPNum()) {
+					holder.tv_current_tips.setText(R.string.current_num);
+				} else {
+					holder.tv_current_tips.setText(R.string.current_patient);
+				}
+				
 				holder.tv_name.setText(doctorBean.getEmployeeName());
 
 			} else if (getItemViewType(position) == DOCOTOR_ITEM_SINGLE) {
@@ -644,6 +640,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 					convertView = inflater.inflate(R.layout.item_single_big_docotor, null);
 					singleHolder = new DocotorSingleViewHolder();
 					singleHolder.iv_avatar = (ImageView) convertView.findViewById(R.id.iv_avatar);
+					singleHolder.tv_current_tips = (TextView) convertView.findViewById(R.id.tv_current_tips);
 					singleHolder.tv_name = (TextView) convertView.findViewById(R.id.name_txt);
 					singleHolder.tv_opNO = (FlickerTextView) convertView.findViewById(R.id.tv_opNO);
 					singleHolder.gridView = (TwoWayGridView) convertView.findViewById(R.id.gridview);
@@ -660,12 +657,26 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 
 			if (appointmentArray != null && appointmentArray.size() > 0) {
 				if (getItemViewType(position) == DOCOTOR_ITEM) {
-					holder.tv_opNO.setText(String.valueOf(appointmentArray.get(0).getOPNo()));
+					if (isShowPatientOPNum()) {
+						holder.tv_current_tips.setText(R.string.current_num);
+						holder.tv_opNO.setText(String.valueOf(appointmentArray.get(0).getOPNo()));
+					} else {
+						holder.tv_current_tips.setText(R.string.current_patient);
+						holder.tv_opNO.setText(String.valueOf(appointmentArray.get(0).getPatientName()));
+					}
+					
 					holder.gridView.setAdapter(
 							new NumAdapter(appointmentArray, getItemViewType(position) == DOCOTOR_ITEM_SINGLE));
 					holder.gridView.post(new MyRunnable(holder.scrollView));
 				} else {
-					singleHolder.tv_opNO.setText(String.valueOf(appointmentArray.get(0).getOPNo()));
+					if (isShowPatientOPNum()) {
+						singleHolder.tv_current_tips.setText(R.string.current_num);
+						singleHolder.tv_opNO.setText(String.valueOf(appointmentArray.get(0).getOPNo()));
+					} else {
+						singleHolder.tv_current_tips.setText(R.string.current_patient);
+						singleHolder.tv_opNO.setText(String.valueOf(appointmentArray.get(0).getPatientName()));
+					}
+					
 					singleHolder.gridView.setAdapter(
 							new NumAdapter(appointmentArray, getItemViewType(position) == DOCOTOR_ITEM_SINGLE));
 				}
@@ -690,7 +701,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 
 			if (clinicID != 0 && photoID != 0) {
 				DisplayImageOptions option = new DisplayImageOptions.Builder().delayBeforeLoading(150)
-						.bitmapConfig(Bitmap.Config.RGB_565).cacheInMemory(true).cacheOnDisk(true)
+						.bitmapConfig(Bitmap.Config.RGB_565).cacheInMemory(false).cacheOnDisk(false)
 						.considerExifParams(true).build();
 
 				ImageLoader.getInstance().loadImage(doctorBean.getPhotoURL(), option,
@@ -804,9 +815,9 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 				holder = (NumViewHolder) convertView.getTag(R.layout.item_num);
 			}
 			if (position == 0) {
-				// holder.tv_num.setTextColor(getResources().getColor(R.color.font_dark));
+				 holder.tv_num.setTextColor(getResources().getColor(R.color.font_blue));
 			} else {
-				// holder.tv_num.setTextColor(getResources().getColor(R.color.font));
+				 holder.tv_num.setTextColor(getResources().getColor(R.color.normal_color));
 			}
 
 			Appointment appointment = list.get(position);
@@ -816,16 +827,22 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 			} else {
 				holder.iv_yizhida.setVisibility(View.INVISIBLE);
 			}
-			
+
 			if (appointment.isEmergency()) {
 				holder.iv_yizhida.setVisibility(View.GONE);
 				holder.iv_emergency.setVisibility(View.VISIBLE);
 			} else {
 				holder.iv_emergency.setVisibility(View.GONE);
 			}
-			
+
 			if (position < countLimit) {
-				holder.tv_num.setText(String.valueOf(appointment.getOPNo()));
+				if (isShowPatientOPNum()) {
+					holder.tv_num.setText(String.valueOf(appointment.getOPNo()));
+				} else {
+					String patientName = appointment.getPatientName();
+					holder.tv_num.setText(appointment.getPatientName());
+				}
+
 				convertView.setVisibility(View.VISIBLE);
 			} else {
 				holder.tv_num.setText("......");
@@ -856,12 +873,18 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 		}
 	}
 
-	private void startCallPatient(int doctorID, int opNO) {
+	private void startCallPatient(int doctorID, int opNO, String patientName) {
 		Integer viewPagerIndex = doctorsIndex.get(String.valueOf(doctorID));
 
 		if (viewPagerIndex != null) {
+			String showString = null;
+			if (isShowPatientOPNum()) {
+				showString = String.valueOf(opNO);
+			} else {
+				showString = patientName;
+			}
 			((FlickerTextView) registeredViews.get(viewPagerIndex).findViewById(R.id.tv_opNO))
-					.startFlicker(String.valueOf(opNO));
+					.startFlicker(showString);
 
 			ArrayList<Appointment> appointments = new ArrayList<Appointment>();
 
@@ -959,11 +982,15 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 
 		}
 	}
+	
+	private boolean isShowPatientOPNum() {
+		return ((MedicalAppliction)getApplication()).getmClinic().getNavigationType().equals("Number");
+	}
 
 	static class DocotorViewHolder {
 		ScrollView scrollView;
 		ImageView iv_avatar;
-		TextView tv_name;
+		TextView tv_current_tips, tv_name;
 		FlickerTextView tv_opNO;
 		TwoWayGridView gridView;
 		ImageView iv_line;
@@ -971,7 +998,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 
 	static class DocotorSingleViewHolder {
 		ImageView iv_avatar;
-		TextView tv_name;
+		TextView tv_current_tips, tv_name;
 		FlickerTextView tv_opNO;
 		TwoWayGridView gridView;
 	}
@@ -1039,8 +1066,9 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 			int opNO = json.getInt("OPNo");
 			String doctorName = json.getString("DoctorName");
 			int doctorID = json.getInt("DoctorID");
+			String patientName = json.getString("PatientName");
 
-			startCallPatient(doctorID, opNO);
+			startCallPatient(doctorID, opNO, patientName);
 
 			// 切换到该医生的界面
 			// Integer pageIndex = doctorsIndex.get(String.valueOf(doctorID));
@@ -1050,24 +1078,36 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 			// }
 
 			String speechString = null;
-			if (doctorName.endsWith("医生")) {
-				speechString = "请" + opNO + "号到" + doctorName + "处就诊";
-			} else {
-				speechString = "请" + opNO + "号到" + doctorName + "医生处就诊";
+			
+			String callPatientString = patientName;   // 默认叫病人的名字
+			if (isShowPatientOPNum()) {
+				callPatientString = String.valueOf(opNO + "号");  // 叫病人的预约号码
 			}
+			if (doctorName.endsWith("医生")) {
+				speechString = "请" + callPatientString + "到" + doctorName + "处就诊";
+			} else {
+				speechString = "请" + callPatientString + "到" + doctorName + "医生处就诊";
+			}
+			
+			speechString = speechString.replace("曾", "增"); // 预防"曾"读成ceng
 
 			// 播放语音
 			mTTSPlayer.play(speechString);
 
+			String showPatientString = null;
 			// 显示多个医生的时候
-
+			if (isShowPatientOPNum()) {
+				showPatientString = String.valueOf(opNO + "  号");  // 叫病人的预约号码
+			} else {
+				showPatientString = patientName + "  ";
+			}
 			if (doctorsArray.size() > 1) {
-				String showString = "请  " + opNO + "  号到" + doctorName + "处就诊";
+				String showString = "请  " + showPatientString + "到" + doctorName + "处就诊";
 				// 在顶部高亮
 				SpannableString ss = new SpannableString(showString);
-				ss.setSpan(new CustomTypefaceSpan("", ttf_NotoSans_Bold), 3, 3 + String.valueOf(opNO).length(),
+				ss.setSpan(new CustomTypefaceSpan("", ttf_NotoSans_Bold), 3, 3 + showPatientString.length(),
 						Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
-				ss.setSpan(new RelativeSizeSpan(1.4f), 3, 3 + String.valueOf(opNO).length(),
+				ss.setSpan(new RelativeSizeSpan(1.4f), 3, 3 + showPatientString.length(),
 						Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
 				tv_highlight_num.setText(ss);
 

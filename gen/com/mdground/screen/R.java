@@ -333,6 +333,7 @@ containing a value of this type.
         public static final int font_dark=0x7f080001;
         public static final int main_background=0x7f080005;
         public static final int normal_black=0x7f080004;
+        public static final int normal_color=0x7f080006;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
@@ -444,22 +445,22 @@ containing a value of this type.
         public static final int fill=0x7f0a0006;
         public static final int fill_horizontal=0x7f0a0007;
         public static final int fill_vertical=0x7f0a0008;
-        public static final int gridview=0x7f0a002c;
+        public static final int gridview=0x7f0a002d;
         public static final int gvp=0x7f0a001f;
         public static final int horizontal=0x7f0a000f;
         public static final int iv_account=0x7f0a0018;
         public static final int iv_avatar=0x7f0a0029;
         public static final int iv_clear_account=0x7f0a001a;
         public static final int iv_clear_password=0x7f0a001d;
-        public static final int iv_clip=0x7f0a002d;
-        public static final int iv_emergency=0x7f0a0031;
+        public static final int iv_clip=0x7f0a002e;
+        public static final int iv_emergency=0x7f0a0032;
         public static final int iv_line=0x7f0a0027;
         public static final int iv_password=0x7f0a001b;
-        public static final int iv_yizhida=0x7f0a0030;
+        public static final int iv_yizhida=0x7f0a0031;
         public static final int left=0x7f0a0009;
         public static final int loading_gif=0x7f0a0025;
         public static final int login_root_layout=0x7f0a0016;
-        public static final int name_txt=0x7f0a002b;
+        public static final int name_txt=0x7f0a002c;
         public static final int none=0x7f0a0012;
         public static final int normal=0x7f0a000e;
         public static final int page=0x7f0a0021;
@@ -471,13 +472,13 @@ containing a value of this type.
         public static final int spacingWidth=0x7f0a0013;
         public static final int spacingWidthUniform=0x7f0a0014;
         public static final int top=0x7f0a000b;
-        public static final int tv_current=0x7f0a0032;
+        public static final int tv_current_tips=0x7f0a002a;
         public static final int tv_highlight_num=0x7f0a0022;
-        public static final int tv_num=0x7f0a002f;
-        public static final int tv_opNO=0x7f0a002a;
+        public static final int tv_num=0x7f0a0030;
+        public static final int tv_opNO=0x7f0a002b;
         public static final int update_progress=0x7f0a0033;
         public static final int vertical=0x7f0a0010;
-        public static final int view_seperator=0x7f0a002e;
+        public static final int view_seperator=0x7f0a002f;
         public static final int viewpager=0x7f0a0024;
     }
     public static final class layout {
@@ -496,22 +497,23 @@ containing a value of this type.
         public static final int main=0x7f090000;
     }
     public static final class string {
-        public static final int account=0x7f060006;
+        public static final int account=0x7f060007;
         public static final int action_settings=0x7f060001;
         public static final int app_name=0x7f060000;
         public static final int current_num=0x7f060003;
+        public static final int current_patient=0x7f060004;
         public static final int hello_world=0x7f060002;
-        public static final int login=0x7f060005;
-        public static final int logining=0x7f060008;
-        public static final int next_num=0x7f060004;
-        public static final int password=0x7f060007;
-        public static final int soft_update_cancel=0x7f06000f;
-        public static final int soft_update_info=0x7f06000b;
-        public static final int soft_update_later=0x7f06000d;
-        public static final int soft_update_no=0x7f060009;
-        public static final int soft_update_title=0x7f06000a;
-        public static final int soft_update_updatebtn=0x7f06000c;
-        public static final int soft_updating=0x7f06000e;
+        public static final int login=0x7f060006;
+        public static final int logining=0x7f060009;
+        public static final int next_num=0x7f060005;
+        public static final int password=0x7f060008;
+        public static final int soft_update_cancel=0x7f060010;
+        public static final int soft_update_info=0x7f06000c;
+        public static final int soft_update_later=0x7f06000e;
+        public static final int soft_update_no=0x7f06000a;
+        public static final int soft_update_title=0x7f06000b;
+        public static final int soft_update_updatebtn=0x7f06000d;
+        public static final int soft_updating=0x7f06000f;
     }
     public static final class style {
         /**  activity anim 

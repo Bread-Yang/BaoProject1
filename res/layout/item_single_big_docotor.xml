@@ -45,7 +45,7 @@
                 android:orientation="horizontal" >
 
                 <TextView
-                    android:id="@+id/tv_current"
+                    android:id="@+id/tv_current_tips"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="65dp"
@@ -54,7 +54,7 @@
                     android:textSize="36dp" />
 
                 <com.mdground.screen.view.FlickerTextView
-                    android:layout_toRightOf="@+id/tv_current"
+                    android:layout_toRightOf="@+id/tv_current_tips"
                     android:id="@+id/tv_opNO"
                     style="@style/TextAppearance.Large.Dark.Bold"
                     android:layout_width="match_parent"
