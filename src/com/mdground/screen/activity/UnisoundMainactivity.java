@@ -98,7 +98,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 
 	private boolean isPlaying;
 
-	private Queue<String> speechQueue = new LinkedList<String>();
+	private Queue<String> speechQueue = new LinkedList<String>(); 
 
 	private int currentSpeechCount = 0;
 	private String currentSpeechMessage;
@@ -778,9 +778,9 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 			this.isSingle = isSingleItem;
 			this.inflater = LayoutInflater.from(UnisoundMainactivity.this);
 			if (isSingleItem) {
-				countLimit = 28;
+				countLimit = 24;
 			} else {
-				countLimit = 11;
+				countLimit = 12;
 			}
 		}
 
@@ -837,7 +837,9 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 
 			if (position < countLimit) {
 				if (isShowPatientOPNum()) {
-					holder.tv_num.setText(String.valueOf(appointment.getOPNo()));
+					String pattern = "0000";
+		            java.text.DecimalFormat df = new java.text.DecimalFormat(pattern);
+					holder.tv_num.setText(df.format(appointment.getOPNo()));
 				} else {
 					String patientName = appointment.getPatientName();
 					holder.tv_num.setText(appointment.getPatientName());
@@ -879,7 +881,9 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 		if (viewPagerIndex != null) {
 			String showString = null;
 			if (isShowPatientOPNum()) {
-				showString = String.valueOf(opNO);
+				String pattern = "0000";
+	            java.text.DecimalFormat df = new java.text.DecimalFormat(pattern);
+				showString = df.format(opNO);
 			} else {
 				showString = patientName;
 			}
@@ -1097,17 +1101,20 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 			String showPatientString = null;
 			// 显示多个医生的时候
 			if (isShowPatientOPNum()) {
-				showPatientString = String.valueOf(opNO + "  号");  // 叫病人的预约号码
+				String pattern = "0000";
+	            java.text.DecimalFormat df = new java.text.DecimalFormat(pattern);
+				String showString = df.format(opNO);
+				showPatientString = String.valueOf(showString + "  ");  // 叫病人的预约号码
 			} else {
 				showPatientString = patientName + "  ";
 			}
 			if (doctorsArray.size() > 1) {
-				String showString = "请  " + showPatientString + "到" + doctorName + "处就诊";
+				String showString = "请  " + showPatientString + "号到" + doctorName + "处就诊";
 				// 在顶部高亮
 				SpannableString ss = new SpannableString(showString);
 				ss.setSpan(new CustomTypefaceSpan("", ttf_NotoSans_Bold), 3, 3 + showPatientString.length(),
 						Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
-				ss.setSpan(new RelativeSizeSpan(1.4f), 3, 3 + showPatientString.length(),
+				ss.setSpan(new RelativeSizeSpan(1.44f), 3, 3 + showPatientString.length(),
 						Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
 				tv_highlight_num.setText(ss);
 

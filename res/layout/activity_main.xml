@@ -12,18 +12,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/main_background"
-        android:paddingBottom="35dp"
-        android:paddingLeft="@dimen/margin_18"
-        android:paddingRight="@dimen/margin_18"
-        android:paddingTop="15dp" />
+        android:paddingBottom="35px"
+        android:paddingLeft="18px"
+        android:paddingRight="18px"
+        android:paddingTop="14px" />
 
     <FrameLayout
         android:id="@+id/page_view"
-        android:layout_width="110dp"
-        android:layout_height="110dp"
+        android:layout_width="1100px"
+        android:layout_height="110px"
         android:layout_alignParentBottom="true"
         android:background="@drawable/page"
-        android:padding="@dimen/margin_3"
+        android:padding="3px"
         android:visibility="invisible" >
 
         <TextView
@@ -33,19 +33,19 @@
             android:layout_height="wrap_content"
             android:layout_gravity="left|bottom"
             android:textColor="#8c8c8c"
-            android:textSize="35sp" />
+            android:textSize="35px" />
     </FrameLayout>
 
     <TextView
         android:id="@+id/tv_highlight_num"
         android:layout_width="fill_parent"
-        android:layout_height="175dp"
+        android:layout_height="182px"
         android:background="#E0FF0078"
         android:gravity="center"
         android:visibility="invisible"
         android:text="请  1035  到黄医生处就诊"
         android:textColor="@android:color/white"
-        android:textSize="95sp" />
+        android:textSize="100px" />
     
     <RadioGroup
         android:id="@+id/rg_page"

@@ -4,48 +4,52 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal" >
 
-    <LinearLayout
-        android:layout_width="255dp"
-        android:layout_height="105dp"
+    <RelativeLayout
+        android:layout_width="255px"
+        android:layout_height="105px"
         android:orientation="horizontal" >
 
         <View
             android:id="@+id/view_seperator"
-            android:layout_width="1dp"
+            android:layout_width="1px"
             android:layout_height="fill_parent"
             android:background="#ADADAD"
             android:gravity="top" />
 
         <TextView
             android:id="@+id/tv_num"
-            android:layout_width="239dp"
+            android:layout_width="239px"
             android:layout_height="fill_parent"
             android:layout_toRightOf="@+id/view_seperator"
             android:gravity="left|center_vertical"
+            android:layout_marginLeft="20px"
+            android:text="1024"
             android:singleLine="true"
             android:textColor="#CC374043"
-            android:textSize="75sp"
+            android:textSize="82px"
             android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/iv_yizhida"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="-30dp"
-            android:layout_marginTop="15dp"
-            android:layout_toRightOf="@+id/tv_num"
+            android:layout_width="30px"
+            android:layout_height="30px"
+            android:layout_marginRight="15px"
+            android:layout_marginTop="15px"
+            android:layout_alignRight="@+id/tv_num"
             android:src="@drawable/icon_yizhida"
             android:visibility="gone" />
 
         <ImageView
             android:id="@+id/iv_emergency"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="30px"
+            android:layout_height="60px"
+            android:layout_marginRight="15px"
             android:layout_gravity="center_vertical"
-            android:layout_marginLeft="-20dp"
-            android:layout_toRightOf="@+id/tv_num"
+            android:layout_centerVertical="true"
+            android:layout_alignRight="@+id/tv_num"
+            android:scaleType="fitXY"
             android:src="@drawable/emergency"
             android:visibility="gone" />
-    </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>

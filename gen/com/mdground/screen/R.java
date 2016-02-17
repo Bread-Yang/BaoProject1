@@ -491,7 +491,6 @@ containing a value of this type.
         public static final int item_num=0x7f030006;
         public static final int item_single_big_docotor=0x7f030007;
         public static final int progress_softupdate=0x7f030008;
-        public static final int tab_guide=0x7f030009;
     }
     public static final class menu {
         public static final int main=0x7f090000;
