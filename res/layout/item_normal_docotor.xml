@@ -123,6 +123,7 @@
                 app:horizontalSpacing="1dip"
                 app:numColumns="3"
                 app:numRows="4"
+                android:focusable="false"
                 app:rowHeight="105px"
                 app:scrollDirectionLandscape="horizontal"
                 app:scrollDirectionPortrait="vertical"

@@ -59,6 +59,7 @@ import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -837,10 +838,12 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 
 			if (position < countLimit) {
 				if (isShowPatientOPNum()) {
+					holder.tv_num.setTextSize(TypedValue.COMPLEX_UNIT_PX, 82);
 					String pattern = "0000";
 		            java.text.DecimalFormat df = new java.text.DecimalFormat(pattern);
 					holder.tv_num.setText(df.format(appointment.getOPNo()));
 				} else {
+					holder.tv_num.setTextSize(TypedValue.COMPLEX_UNIT_PX, 55);
 					String patientName = appointment.getPatientName();
 					holder.tv_num.setText(appointment.getPatientName());
 				}
@@ -1109,7 +1112,12 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 				showPatientString = patientName + "  ";
 			}
 			if (doctorsArray.size() > 1) {
-				String showString = "请  " + showPatientString + "号到" + doctorName + "处就诊";
+				String showString = "";
+				if (isShowPatientOPNum()) {
+					showString = "请  " + showPatientString + "号到" + doctorName + "处就诊";
+				} else {
+					showString = "请  " + showPatientString + "到" + doctorName + "处就诊";
+				}
 				// 在顶部高亮
 				SpannableString ss = new SpannableString(showString);
 				ss.setSpan(new CustomTypefaceSpan("", ttf_NotoSans_Bold), 3, 3 + showPatientString.length(),

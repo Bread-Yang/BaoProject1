@@ -6,16 +6,16 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="10px"
         android:layout_marginLeft="50px"
         android:layout_marginRight="50px"
+        android:layout_marginTop="10px"
         android:background="@drawable/shape_item_doctor"
         android:orientation="vertical" >
 
         <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_marginTop="42px"
             android:layout_height="wrap_content"
+            android:layout_marginTop="42px"
             android:orientation="horizontal" >
 
             <LinearLayout
@@ -55,13 +55,13 @@
                     android:textSize="36px" />
 
                 <com.mdground.screen.view.FlickerTextView
-                    android:layout_toRightOf="@+id/tv_current_tips"
                     android:id="@+id/tv_opNO"
                     style="@style/TextAppearance.Large.Dark.Bold"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10px"
                     android:layout_marginLeft="30px"
+                    android:layout_marginTop="10px"
+                    android:layout_toRightOf="@+id/tv_current_tips"
                     android:textSize="210px"
                     android:visibility="visible" />
             </RelativeLayout>
@@ -91,7 +91,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="80px"
-             android:layout_marginTop="25px"
+            android:layout_marginTop="25px"
             android:gravity="center"
             android:text="@string/next_num"
             android:textSize="35px" />
@@ -104,6 +104,10 @@
             android:layout_height="420px"
             android:layout_marginLeft="60px"
             android:layout_marginTop="25px"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            app:cacheColorHint="@android:color/transparent"
             app:columnWidth="250px"
             app:gravity="center"
             app:horizontalSpacing="1px"
