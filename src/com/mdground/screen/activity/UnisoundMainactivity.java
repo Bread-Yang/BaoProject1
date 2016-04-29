@@ -18,16 +18,18 @@ import org.mdground.api.base.ResponseData;
 import org.mdground.api.bean.Appointment;
 import org.mdground.api.bean.Doctor;
 import org.mdground.api.server.clinic.GetAppointmentInfoListByDoctor;
-import org.mdground.api.server.global.GetDoctorList;
+import org.mdground.api.server.clinic.GetDoctorInfoListByScreen;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mdground.screen.MedicalAppliction;
 import com.mdground.screen.R;
 import com.mdground.screen.constant.MedicalConstant;
+import com.mdground.screen.constant.MemberConstant;
 import com.mdground.screen.fonts.CustomTypefaceSpan;
 import com.mdground.screen.service.DataService;
 import com.mdground.screen.utils.L;
+import com.mdground.screen.utils.PreferenceUtils;
 import com.mdground.screen.utils.UpdateManager;
 import com.mdground.screen.view.FlickerTextView;
 import com.mdground.screen.view.GridViewPager;
@@ -87,7 +89,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 	private Timer timer;
 	private static final int CHANGE_PAGE = 0x01;
 	private View pageView;
-	private ArrayList<Doctor> doctorsArray = new ArrayList<Doctor>();
+	private ArrayList<Doctor> mDoctorsArray = new ArrayList<Doctor>();
 	private HashMap<String, Integer> doctorsIndex = new HashMap<String, Integer>();
 	private HashMap<String, ArrayList<Appointment>> allDoctorAppointmentArray = new HashMap<String, ArrayList<Appointment>>();
 
@@ -360,10 +362,10 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 
 		LayoutInflater inflate = LayoutInflater.from(getApplicationContext());
 
-		L.e(this, "size : " + doctorsArray.size());
+		L.e(this, "size : " + mDoctorsArray.size());
 
-		if (doctorsArray.size() > 2) {
-			for (int i = 0; i < doctorsArray.size() / 2 + 1; i++) { // 一页显示两个医生
+		if (mDoctorsArray.size() > 2) {
+			for (int i = 0; i < mDoctorsArray.size() / 2 + 1; i++) { // 一页显示两个医生
 				RadioButton button = (RadioButton) inflate.inflate(R.layout.indicator_view, null);
 
 				RadioGroup.LayoutParams layoutParams = new RadioGroup.LayoutParams(40, 30);
@@ -427,7 +429,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 	}
 
 	private void getDoctorList() {
-		new GetDoctorList(getApplicationContext()).getDoctorList(new RequestCallBack() {
+		new GetDoctorInfoListByScreen(getApplicationContext()).getDoctorInfoListByScreen(MedicalAppliction.employee.getEmployeeID(), new RequestCallBack() {
 
 			@Override
 			public void onSuccess(ResponseData response) {
@@ -441,7 +443,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 						Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 						Doctor doctor = gson.fromJson(item.toString(), Doctor.class);
 
-						doctorsArray.add(doctor);
+						mDoctorsArray.add(doctor);
 						doctorsIndex.put(String.valueOf(doctor.getDoctorID()), i);
 					}
 				} catch (JSONException e) {
@@ -459,15 +461,15 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 			public void onFinish() {
 				mLoadIngDialog.dismiss();
 
-				totalNum = doctorsArray.size();
-				if (doctorsArray.size() > 1) {
+				totalNum = mDoctorsArray.size();
+				if (mDoctorsArray.size() > 1) {
 					// pageView.setVisibility(View.VISIBLE);
 				} else {
 					// pageView.setVisibility(View.INVISIBLE);
 					viewPager.setColumnNum(1);
 				}
 				tv_page.setText("1/" + getTotalPage(totalNum));
-				doctorAdapter = new DoctorAdapter(doctorsArray);
+				doctorAdapter = new DoctorAdapter(mDoctorsArray);
 				viewPager.setAdapter(doctorAdapter);
 
 				initIndicator();
@@ -478,8 +480,8 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 
 					@Override
 					public void run() {
-						for (int i = 0; i < doctorsArray.size(); i++) {
-							getAppointmentListByDoctor(i, (int) doctorsArray.get(i).getDoctorID());
+						for (int i = 0; i < mDoctorsArray.size(); i++) {
+							getAppointmentListByDoctor(i, (int) mDoctorsArray.get(i).getDoctorID());
 						}
 					}
 				}, 2000);
@@ -633,7 +635,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 					holder.tv_current_tips.setText(R.string.current_patient);
 				}
 				
-				holder.tv_name.setText(doctorBean.getEmployeeName());
+				holder.tv_name.setText(doctorBean.getEmployeeNickName());
 
 			} else if (getItemViewType(position) == DOCOTOR_ITEM_SINGLE) {
 
@@ -650,7 +652,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 					singleHolder = (DocotorSingleViewHolder) convertView.getTag(R.layout.item_single_big_docotor);
 				}
 
-				singleHolder.tv_name.setText(doctorBean.getEmployeeName());
+				singleHolder.tv_name.setText(doctorBean.getEmployeeNickName());
 			}
 
 			ArrayList<Appointment> appointmentArray = allDoctorAppointmentArray
@@ -1090,11 +1092,12 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 			if (isShowPatientOPNum()) {
 				callPatientString = String.valueOf(opNO + "号");  // 叫病人的预约号码
 			}
-			if (doctorName.endsWith("医生")) {
-				speechString = "请" + callPatientString + "到" + doctorName + "处就诊";
-			} else {
-				speechString = "请" + callPatientString + "到" + doctorName + "医生处就诊";
-			}
+			speechString = "请" + callPatientString + "到" + doctorName + "处就诊";
+//			if (doctorName.endsWith("医生")) {
+//				speechString = "请" + callPatientString + "到" + doctorName + "处就诊";
+//			} else {
+//				speechString = "请" + callPatientString + "到" + doctorName + "医生处就诊";
+//			}
 			
 			speechString = speechString.replace("曾", "增"); // 预防"曾"读成ceng
 
@@ -1111,7 +1114,7 @@ public class UnisoundMainactivity extends BaseActivity implements TTSPlayerListe
 			} else {
 				showPatientString = patientName + "  ";
 			}
-			if (doctorsArray.size() > 1) {
+			if (mDoctorsArray.size() > 1) {
 				String showString = "";
 				if (isShowPatientOPNum()) {
 					showString = "请  " + showPatientString + "号到" + doctorName + "处就诊";
